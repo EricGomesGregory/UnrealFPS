@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "FPSCharacter.generated.h"
 
+class UCombatComponent;
 class UCameraComponent;
 class USpringArmComponent;
 
@@ -24,6 +25,9 @@ public:
 	void ToggleCrouch();
 	
 protected:
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UCombatComponent> CombatComponent;
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<USkeletalMeshComponent> FirstPersonMesh;
 	

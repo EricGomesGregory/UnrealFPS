@@ -5,6 +5,7 @@
 
 #include "Camera/CameraComponent.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "FPS/Combat/CombatComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 
@@ -39,6 +40,9 @@ AFPSCharacter::AFPSCharacter()
 	ThirdPersonMesh->bReceivesDecals = false;
 	
 	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
+	
+	CombatComponent = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComponent"));
+	CombatComponent->SetIsReplicated(true);
 }
 
 void AFPSCharacter::BeginPlay()
