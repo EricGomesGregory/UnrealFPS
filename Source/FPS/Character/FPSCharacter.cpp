@@ -5,6 +5,7 @@
 
 #include "Camera/CameraComponent.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 
 
@@ -37,6 +38,7 @@ AFPSCharacter::AFPSCharacter()
 	ThirdPersonMesh->bOwnerNoSee = true;
 	ThirdPersonMesh->bReceivesDecals = false;
 	
+	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
 }
 
 void AFPSCharacter::BeginPlay()
@@ -53,5 +55,17 @@ void AFPSCharacter::Tick(float DeltaTime)
 void AFPSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+}
+
+void AFPSCharacter::ToggleCrouch()
+{
+	if (IsCrouched())
+	{
+		UnCrouch();
+	}
+	else
+	{
+		Crouch();
+	}
 }
 
