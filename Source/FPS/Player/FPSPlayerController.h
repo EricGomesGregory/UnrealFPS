@@ -51,6 +51,18 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category="FPS|Input|Movement")
 	TObjectPtr<UInputAction> CrouchAction;
 	
+	UPROPERTY(EditDefaultsOnly, Category="FPS|Input|Combat")
+	TObjectPtr<UInputAction> AimWeaponAction;
+	
+	UPROPERTY(EditDefaultsOnly, Category="FPS|Input|Combat")
+	TObjectPtr<UInputAction> CycleWeaponAction;
+	
+	UPROPERTY(EditDefaultsOnly, Category="FPS|Input|Combat")
+	TObjectPtr<UInputAction> FireWeaponAction;
+	
+	UPROPERTY(EditDefaultsOnly, Category="FPS|Input|Combat")
+	TObjectPtr<UInputAction> ReloadWeaponAction;
+	
 protected:
 	virtual void BeginPlay() override;
 
@@ -68,4 +80,22 @@ private:
 	
 	/**  */
 	void Input_Crouch(const FInputActionValue& InputActionValue);
+	
+	/**  */
+	void Input_AimWeapon_Pressed(const FInputActionValue& InputActionValue);
+	
+	/**  */
+	void Input_AimWeapon_Released(const FInputActionValue& InputActionValue);
+	
+	/**  */
+	void Input_CycleWeapon(const FInputActionValue& InputActionValue);
+	
+	/**  */
+	void Input_FireWeapon_Pressed(const FInputActionValue& InputActionValue);
+	
+	/**  */
+	void Input_FireWeapon_Released(const FInputActionValue& InputActionValue);
+	
+	/**  */
+	void Input_ReloadWeapon(const FInputActionValue& InputActionValue);
 };
