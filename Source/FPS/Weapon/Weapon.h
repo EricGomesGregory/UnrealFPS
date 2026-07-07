@@ -15,11 +15,14 @@ class FPS_API AWeapon : public AActor
 public:
 	AWeapon();
 
-	UFUNCTION(BlueprintCallable, Category="FPS|Weapon")
+	UFUNCTION(BlueprintPure, Category="FPS|Weapon")
 	USkeletalMeshComponent* GetFirstPersonMesh() const { return FirstPersonMesh; }
 	
-	UFUNCTION(BlueprintCallable, Category="FPS|Weapon")
+	UFUNCTION(BlueprintPure, Category="FPS|Weapon")
 	USkeletalMeshComponent* GetThirdPersonMesh() const { return ThirdPersonMesh; }
+	
+	//UFUNCTION(BlueprintPure, Category="FPS|Weapon")
+	//FGameplayTag GetWeaponTypeTag() const { return WeaponTypeTag; }
 	
 	UFUNCTION(BlueprintCallable, Category="FPS|Weapon")
 	void SetFirstPersonMeshHiddenInGame(bool NewHidden);
@@ -29,9 +32,10 @@ public:
 	
 	void AttachToOwningPawn() const;
 	
-protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPS|Weapon", Meta = (Categories = "Weapon.Type"))
 	FGameplayTag WeaponTypeTag;
+	
+protected:
 	
 	/** */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)

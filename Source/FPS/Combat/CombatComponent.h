@@ -67,7 +67,7 @@ protected:
 	void OnRep_CurrentWeapon(AWeapon* LastWeapon);
 	
 private:
-	UPROPERTY(Transient, ReplicatedUsing=OnRep_CurrentWeapon)
+	UPROPERTY(Transient, BlueprintReadOnly, ReplicatedUsing=OnRep_CurrentWeapon, meta=(AllowPrivateAccess=true))
 	TObjectPtr<AWeapon> CurrentWeapon;
 	
 	UPROPERTY(Transient, Replicated)

@@ -35,7 +35,7 @@ public:
 	void ToggleCrouch();
 	
 protected:
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="FPS|Character")
 	TObjectPtr<UCombatComponent> CombatComponent;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
