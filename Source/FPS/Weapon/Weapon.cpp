@@ -3,9 +3,11 @@
 
 #include "Weapon.h"
 
-#include "Components/SkeletalMeshComponent.h"
-#include "Components/StaticMeshComponent.h"
+#include "GameFramework/Pawn.h"
 #include "FPS/FPSGameplayTags.h"
+#include "FPS/Interfaces/PlayerInterface.h"
+#include "Components/StaticMeshComponent.h"
+#include "Components/SkeletalMeshComponent.h"
 
 
 AWeapon::AWeapon()
@@ -30,10 +32,56 @@ AWeapon::AWeapon()
 	WeaponTypeTag = ShooterGameplayTags::Weapon_Type_None;
 }
 
+void AWeapon::SetFirstPersonMeshHiddenInGame(bool NewHidden)
+{
+	FirstPersonMesh->SetHiddenInGame(NewHidden);
+}
+
+void AWeapon::SetThirdPersonMeshHiddenInGame(bool NewHidden)
+{
+	ThirdPersonMesh->SetHiddenInGame(NewHidden);
+}
+
+void AWeapon::AttachToOwningPawn() const
+{
+	const auto* OwningPawn = GetInstigator();
+	check(OwningPawn);
+	
+	if (OwningPawn->Implements<UPlayerInterface>())
+	{
+		SetMeshVisibilities(OwningPawn);
+		
+		const FName AttachmentSocketName = IPlayerInterface::Execute_GetWeaponAttachPointSocketName(OwningPawn, WeaponTypeTag);
+		USkeletalMeshComponent* PawnFirstPersonMesh = IPlayerInterface::Execute_GetFirstPersonSkeletalMeshComponent(OwningPawn);
+		USkeletalMeshComponent* PawnThirdPersonMesh = IPlayerInterface::Execute_GetThirdPersonSkeletalMeshComponent(OwningPawn);
+	
+		FirstPersonMesh->AttachToComponent(PawnFirstPersonMesh, FAttachmentTransformRules::KeepRelativeTransform, AttachmentSocketName);
+		ThirdPersonMesh->AttachToComponent(PawnThirdPersonMesh, FAttachmentTransformRules::KeepRelativeTransform, AttachmentSocketName);
+	}
+}
+
 void AWeapon::BeginPlay()
 {
 	Super::BeginPlay();
 	
+}
+
+void AWeapon::OnRep_Instigator()
+{
+	Super::OnRep_Instigator();
+	
+	AttachToOwningPawn();
+}
+
+void AWeapon::SetMeshVisibilities(const APawn* OwningPawn) const
+{
+	check(OwningPawn);
+	
+	const bool bVisibleInFirstPerson = !OwningPawn->IsLocallyControlled();
+	const bool bVisibleInThirdPerson = OwningPawn->IsLocallyControlled();
+	
+	FirstPersonMesh->SetHiddenInGame(bVisibleInFirstPerson);
+	ThirdPersonMesh->SetHiddenInGame(bVisibleInThirdPerson);
 }
 
 

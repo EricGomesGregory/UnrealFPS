@@ -21,6 +21,13 @@ public:
 	UFUNCTION(BlueprintCallable, Category="FPS|Weapon")
 	USkeletalMeshComponent* GetThirdPersonMesh() const { return ThirdPersonMesh; }
 	
+	UFUNCTION(BlueprintCallable, Category="FPS|Weapon")
+	void SetFirstPersonMeshHiddenInGame(bool NewHidden);
+	
+	UFUNCTION(BlueprintCallable, Category="FPS|Weapon")
+	void SetThirdPersonMeshHiddenInGame(bool NewHidden);
+	
+	void AttachToOwningPawn() const;
 	
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPS|Weapon", Meta = (Categories = "Weapon.Type"))
@@ -37,4 +44,7 @@ protected:
 protected:
 	virtual void BeginPlay() override;
 
+	virtual void OnRep_Instigator() override;
+	
+	void SetMeshVisibilities(const APawn* OwningPawn) const;
 };

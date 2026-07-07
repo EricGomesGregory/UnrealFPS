@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "FPS/Interfaces/PlayerInterface.h"
 #include "GameFramework/Character.h"
 #include "FPSCharacter.generated.h"
 
@@ -11,16 +12,25 @@ class UCameraComponent;
 class USpringArmComponent;
 
 UCLASS()
-class FPS_API AFPSCharacter : public ACharacter
+class FPS_API AFPSCharacter : public ACharacter,
+public IPlayerInterface
 {
 	GENERATED_BODY()
 
 public:
 	AFPSCharacter();
 
+	//~IPlayerInterface
+	virtual FName GetWeaponAttachPointSocketName_Implementation(const FGameplayTag& WeaponTyeTag) const override;
+	virtual USkeletalMeshComponent* GetFirstPersonSkeletalMeshComponent_Implementation() const override;
+	virtual USkeletalMeshComponent* GetThirdPersonSkeletalMeshComponent_Implementation() const override;
+	//~End IPlayerInterface
+	
 	virtual void Tick(float DeltaTime) override;
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	
+	virtual void PossessedBy(AController* NewController) override;
 	
 	void ToggleCrouch();
 	
