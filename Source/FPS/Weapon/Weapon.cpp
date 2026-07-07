@@ -5,6 +5,7 @@
 
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "FPS/FPSGameplayTags.h"
 
 
 AWeapon::AWeapon()
@@ -25,6 +26,8 @@ AWeapon::AWeapon()
 	ThirdPersonMesh->bReceivesDecals = false;
 	ThirdPersonMesh->SetupAttachment(FirstPersonMesh);
 	ThirdPersonMesh->SetHiddenInGame(true);
+	
+	WeaponTypeTag = ShooterGameplayTags::Weapon_Type_None;
 }
 
 void AWeapon::BeginPlay()
