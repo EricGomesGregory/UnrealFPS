@@ -10,6 +10,7 @@
 class AWeapon;
 class UWeaponData;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCombatToggleActionEvent, bool, bPressed);
 
 UCLASS()
 class FPS_API UCombatComponent : public UActorComponent
@@ -53,6 +54,12 @@ public:
 	/**  */
 	void Initiate_ReloadWeapon();
 	
+public:
+	UPROPERTY(BlueprintReadOnly, Replicated, Category="FPS|Weapon")
+	bool bAiming;
+	
+	mutable FCombatToggleActionEvent OnAimWeapon;
+	
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPS|Weapon")
 	TObjectPtr<UWeaponData> WeaponsData;
@@ -72,4 +79,10 @@ private:
 	
 	UPROPERTY(Transient, Replicated)
 	TArray<AWeapon*> InventoryWeapons;
+	
+private:
+	UFUNCTION(Server, Reliable)
+	void Server_Aim(bool bPressed);
+	
+	void Local_Aim(bool bPressed);
 };

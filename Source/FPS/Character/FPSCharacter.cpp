@@ -68,6 +68,8 @@ void AFPSCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	check(CombatComponent);
+	CombatComponent->OnAimWeapon.AddDynamic(this, &AFPSCharacter::OnAiming);
 }
 
 void AFPSCharacter::BeginDestroy()

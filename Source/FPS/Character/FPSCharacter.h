@@ -34,6 +34,9 @@ public:
 	
 	void ToggleCrouch();
 	
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnAiming(bool bIsAiming);
+	
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="FPS|Character")
 	TObjectPtr<UCombatComponent> CombatComponent;

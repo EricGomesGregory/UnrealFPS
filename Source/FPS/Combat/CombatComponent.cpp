@@ -20,6 +20,8 @@ void UCombatComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty
 	
 	DOREPLIFETIME(ThisClass, InventoryWeapons);
 	DOREPLIFETIME(ThisClass, CurrentWeapon);
+	
+	DOREPLIFETIME_CONDITION(ThisClass, bAiming, COND_SkipOwner);
 }
 
 void UCombatComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -68,12 +70,21 @@ void UCombatComponent::Equip(AWeapon* Weapon)
 
 void UCombatComponent::Initiate_AimWeapon_Pressed()
 {
-	UE_LOG(LogTemp, Display, TEXT("AimWeapon::Pressed"));
+	Local_Aim(true);
+	Server_Aim(true);
+	
+	auto* Owner = GetOwner();
+	check(Owner);
+	
+	OnAimWeapon.Broadcast(true);
 }
 
 void UCombatComponent::Initiate_AimWeapon_Released()
 {
-	UE_LOG(LogTemp, Display, TEXT("AimWeapon::Released"));
+	Local_Aim(false);
+	Server_Aim(false);
+	
+	OnAimWeapon.Broadcast(false);
 }
 
 void UCombatComponent::Initiate_CycleWeapon()
@@ -117,4 +128,14 @@ void UCombatComponent::OnRep_CurrentWeapon(AWeapon* LastWeapon)
 	{
 		CurrentWeapon->AttachToOwningPawn();
 	}
+}
+
+void UCombatComponent::Server_Aim_Implementation(bool bPressed)
+{
+	Local_Aim(bPressed);
+}
+
+void UCombatComponent::Local_Aim(bool bPressed)
+{
+	bAiming = bPressed;
 }

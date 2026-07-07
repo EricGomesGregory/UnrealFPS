@@ -30,6 +30,7 @@ AWeapon::AWeapon()
 	ThirdPersonMesh->SetHiddenInGame(true);
 	
 	WeaponTypeTag = ShooterGameplayTags::Weapon_Type_None;
+	AimFieldOfView = 65.0f;
 }
 
 void AWeapon::SetFirstPersonMeshHiddenInGame(bool NewHidden)
