@@ -70,6 +70,16 @@ void AFPSCharacter::BeginPlay()
 	
 }
 
+void AFPSCharacter::BeginDestroy()
+{
+	Super::BeginDestroy();
+	
+	if (IsValid(CombatComponent))
+	{
+		CombatComponent->DestroyInventoryWeapons();	
+	}
+}
+
 void AFPSCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);

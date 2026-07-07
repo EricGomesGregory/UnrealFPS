@@ -19,6 +19,8 @@ class FPS_API UCombatComponent : public UActorComponent
 public:
 	UCombatComponent();
 	
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+	
 	/** Returns the combat component if one exists on the specified actor. */
 	UFUNCTION(BlueprintPure, Category = "FPS|Combat")
 	static UCombatComponent* FindCombatComponent(const AActor* Actor) { return (Actor ? Actor->FindComponentByClass<UCombatComponent>() : nullptr); }
@@ -30,6 +32,8 @@ public:
 	void SpawnInventoryWeapons();
 	
 	void DestroyInventoryWeapons();
+	
+	void Equip(AWeapon* Weapon);
 	
 	/**  */
 	void Initiate_AimWeapon_Pressed();
@@ -54,7 +58,18 @@ protected:
 	TObjectPtr<UWeaponData> WeaponsData;
 
 	UPROPERTY(EditDefaultsOnly, Category="FPS|Weapon")
-	TSubclassOf<AWeapon> DefaultWeaponClass;
+	TArray<TSubclassOf<AWeapon>> DefaultWeaponClasses;
 	
 	AWeapon* SpawnWeapon(TSubclassOf<AWeapon> WeaponClass) const;
+	
+protected:
+	UFUNCTION()
+	void OnRep_CurrentWeapon(AWeapon* LastWeapon);
+	
+private:
+	UPROPERTY(Transient, ReplicatedUsing=OnRep_CurrentWeapon)
+	TObjectPtr<AWeapon> CurrentWeapon;
+	
+	UPROPERTY(Transient, Replicated)
+	TArray<AWeapon*> InventoryWeapons;
 };

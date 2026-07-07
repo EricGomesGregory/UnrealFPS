@@ -45,9 +45,8 @@ void AWeapon::SetThirdPersonMeshHiddenInGame(bool NewHidden)
 void AWeapon::AttachToOwningPawn() const
 {
 	const auto* OwningPawn = GetInstigator();
-	check(OwningPawn);
 	
-	if (OwningPawn->Implements<UPlayerInterface>())
+	if (IsValid(OwningPawn) && OwningPawn->Implements<UPlayerInterface>())
 	{
 		SetMeshVisibilities(OwningPawn);
 		
