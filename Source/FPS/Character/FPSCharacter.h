@@ -37,6 +37,9 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnAiming(bool bIsAiming);
 	
+	UFUNCTION(BlueprintCallable)
+	FRotator GetFixedAimedRotation() const;
+	
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="FPS|Character")
 	TObjectPtr<UCombatComponent> CombatComponent;

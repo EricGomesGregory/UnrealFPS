@@ -113,3 +113,16 @@ void AFPSCharacter::ToggleCrouch()
 	}
 }
 
+FRotator AFPSCharacter::GetFixedAimedRotation() const
+{
+	FRotator AimRotation = GetBaseAimRotation();
+	if ((AimRotation.Pitch > 90.0f || AimRotation.Pitch < 0.0f) && !IsLocallyControlled())
+	{
+		const FVector2D InRange(270.0f, 360.0f);
+		const FVector2D OutRange(-90.0f, 0.0f);
+		
+		AimRotation.Pitch = FMath::GetMappedRangeValueClamped(InRange, OutRange, AimRotation.Pitch);
+	}
+	return AimRotation;
+}
+
