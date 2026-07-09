@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "FPS/Combat/CombatComponent.h"
 #include "FPS/Interfaces/PlayerInterface.h"
 #include "GameFramework/Character.h"
 #include "FPSCharacter.generated.h"
@@ -37,11 +38,14 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnAiming(bool bIsAiming);
 	
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="FPS|Character|Animation")
 	FRotator GetFixedAimedRotation() const;
 	
 	UPROPERTY(BlueprintReadOnly, Category="FPS|Character|Animation")
 	FTransform FABRICK_SocketTransform;
+	
+	UFUNCTION(BlueprintCallable, Category="FPS|Character|Animation")
+	bool HasCurrentWeapon() const { return (CombatComponent ? CombatComponent->GetCurrentWeapon() != nullptr : false); }
 	
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="FPS|Character")
