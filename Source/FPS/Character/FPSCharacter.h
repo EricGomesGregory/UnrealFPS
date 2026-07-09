@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "FPS/FPSTypes.h"
 #include "FPS/Combat/CombatComponent.h"
 #include "FPS/Interfaces/PlayerInterface.h"
 #include "GameFramework/Character.h"
@@ -44,6 +45,15 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category="FPS|Character|Animation")
 	FTransform FABRICK_SocketTransform;
 	
+	UPROPERTY(BlueprintReadOnly, Category="FPS|Character|Animation")
+	float AO_Yaw;
+	
+	UPROPERTY(BlueprintReadOnly, Category="FPS|Character|Animation")
+	float MovementOffsetYaw;
+	
+	UPROPERTY(BlueprintReadOnly, Category="FPS|Character|Animation")
+	EFPSTurningInPlace TurningStatus;
+	
 	UFUNCTION(BlueprintCallable, Category="FPS|Character|Animation")
 	bool HasCurrentWeapon() const { return (CombatComponent ? CombatComponent->GetCurrentWeapon() != nullptr : false); }
 	
@@ -60,6 +70,12 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UCameraComponent> FirstPersonCamera;
 	
+	UPROPERTY(EditAnywhere, Category="FPS|Character|Animation")
+	float TurnInPlaceInterpolationSpeed;
+	
+	UPROPERTY(EditAnywhere, Category="FPS|Character|Animation")
+	float TurnInPlaceMinYaw = 5.0f;
+	
 protected:
 	virtual void BeginPlay() override;
 	
@@ -67,4 +83,13 @@ protected:
 	
 private:
 	void FABRIK_CalculateSocketTransform();
+	
+	void CalculateTurnInPlaceParameters(float DeltaTime);
+	
+	void TurnInPlace(float DeltaTime);
+	
+private:
+	FRotator StartingRotation;
+	
+	float InterpAO_Yaw;
 };

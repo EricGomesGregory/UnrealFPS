@@ -10,6 +10,7 @@
 #include "FPS/Weapon/WeaponData.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 
 
 AFPSCharacter::AFPSCharacter()
@@ -45,6 +46,9 @@ AFPSCharacter::AFPSCharacter()
 	
 	CombatComponent = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComponent"));
 	CombatComponent->SetIsReplicated(true);
+	
+	TurningStatus = EFPSTurningInPlace::NotTurning;
+	TurnInPlaceInterpolationSpeed = 4.0f;
 }
 
 FName AFPSCharacter::GetWeaponAttachPointSocketName_Implementation(const FGameplayTag& WeaponTyeTag) const
@@ -69,6 +73,8 @@ void AFPSCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	StartingRotation = FRotator(0.0f,  GetBaseAimRotation().Yaw, 0.0f);
+	
 	check(CombatComponent);
 	CombatComponent->OnAimWeapon.AddDynamic(this, &AFPSCharacter::OnAiming);
 }
@@ -83,10 +89,11 @@ void AFPSCharacter::BeginDestroy()
 	}
 }
 
-void AFPSCharacter::Tick(float DeltaTime)
+void AFPSCharacter::Tick(const float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	CalculateTurnInPlaceParameters(DeltaTime);
 	FABRIK_CalculateSocketTransform();
 }
 
@@ -147,12 +154,69 @@ void AFPSCharacter::FABRIK_CalculateSocketTransform()
 					"hand_r", 
 					FABRICK_SocketTransform.GetLocation(), 
 					FABRICK_SocketTransform.GetRotation().Rotator(), 
-					OutLocation, 
-					OutRotation);
+					OutLocation, OutRotation);
 			
 				FABRICK_SocketTransform.SetLocation(OutLocation);
 				FABRICK_SocketTransform.SetRotation(OutRotation.Quaternion());
 			}
+		}
+	}
+}
+
+void AFPSCharacter::CalculateTurnInPlaceParameters(const float DeltaTime)
+{
+	const FVector Velocity = GetVelocity();
+	const float Speed = Velocity.Size2D();
+	const bool bIsFalling = GetCharacterMovement()->IsFalling();
+	
+	if (Speed == 0.0f && !bIsFalling)
+	{
+		const FRotator CurrentRotation = FRotator(0.0f, GetBaseAimRotation().Yaw, 0.0f);
+		const FRotator DeltaRotation = UKismetMathLibrary::NormalizedDeltaRotator(CurrentRotation, StartingRotation);
+		AO_Yaw =  DeltaRotation.Yaw;
+		
+		if (TurningStatus == EFPSTurningInPlace::NotTurning)
+		{
+			InterpAO_Yaw = AO_Yaw;
+		}
+		
+		TurnInPlace(DeltaTime);
+	}
+	if (Speed > 0.0f || bIsFalling)
+	{
+		StartingRotation = FRotator(0.0f, GetBaseAimRotation().Yaw, 0.0f);
+		AO_Yaw = 0.0f;
+
+		const FRotator AimRotation = GetBaseAimRotation();
+		const FRotator MovementRotation = UKismetMathLibrary::MakeRotFromX(GetVelocity());
+		MovementOffsetYaw = UKismetMathLibrary::NormalizedDeltaRotator(MovementRotation, AimRotation).Yaw;
+		
+		TurningStatus = EFPSTurningInPlace::NotTurning;
+	}
+	
+	AO_Yaw *= -1.0f;
+}
+
+void AFPSCharacter::TurnInPlace(const float DeltaTime)
+{
+	if (AO_Yaw > 90.0f)
+	{
+		TurningStatus = EFPSTurningInPlace::Right;
+	}
+	else if (AO_Yaw < -90.0f)
+	{
+		TurningStatus = EFPSTurningInPlace::Left;
+	}
+	
+	if (TurningStatus != EFPSTurningInPlace::NotTurning)
+	{
+		InterpAO_Yaw = FMath::FInterpTo(InterpAO_Yaw, 0.0f, DeltaTime, TurnInPlaceInterpolationSpeed);
+		AO_Yaw = InterpAO_Yaw;
+		
+		if (FMath::Abs(AO_Yaw) < TurnInPlaceMinYaw)
+		{
+			TurningStatus = EFPSTurningInPlace::NotTurning;
+			StartingRotation = FRotator(0.0f, GetBaseAimRotation().Yaw, 0.0f);
 		}
 	}
 }
