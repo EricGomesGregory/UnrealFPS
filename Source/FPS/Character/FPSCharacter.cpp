@@ -6,6 +6,7 @@
 #include "Camera/CameraComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "FPS/Combat/CombatComponent.h"
+#include "FPS/Weapon/Weapon.h"
 #include "FPS/Weapon/WeaponData.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -85,6 +86,8 @@ void AFPSCharacter::BeginDestroy()
 void AFPSCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	FABRIK_CalculateSocketTransform();
 }
 
 void AFPSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -124,5 +127,33 @@ FRotator AFPSCharacter::GetFixedAimedRotation() const
 		AimRotation.Pitch = FMath::GetMappedRangeValueClamped(InRange, OutRange, AimRotation.Pitch);
 	}
 	return AimRotation;
+}
+
+void AFPSCharacter::FABRIK_CalculateSocketTransform()
+{
+	if (IsValid(CombatComponent))
+	{
+		if (const auto* CurrentWeapon = CombatComponent->GetCurrentWeapon())
+		{
+			const auto* WeaponThirdPersonMesh = CurrentWeapon->GetThirdPersonMesh();
+			if (IsValid(WeaponThirdPersonMesh))
+			{
+				FABRICK_SocketTransform = WeaponThirdPersonMesh->GetSocketTransform("FABRIK_Socket", RTS_World);
+				
+				FVector OutLocation = FVector::ZeroVector;
+				FRotator OutRotation = FRotator::ZeroRotator;
+				
+				GetMesh()->TransformToBoneSpace(
+					"hand_r", 
+					FABRICK_SocketTransform.GetLocation(), 
+					FABRICK_SocketTransform.GetRotation().Rotator(), 
+					OutLocation, 
+					OutRotation);
+			
+				FABRICK_SocketTransform.SetLocation(OutLocation);
+				FABRICK_SocketTransform.SetRotation(OutRotation.Quaternion());
+			}
+		}
+	}
 }
 

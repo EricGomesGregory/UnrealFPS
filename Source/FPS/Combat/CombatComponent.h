@@ -28,6 +28,9 @@ public:
 	
 	UWeaponData* GetWeaponsData() const { return WeaponsData; }
 	
+	UFUNCTION(BlueprintPure, Category = "FPS|Combat")
+	AWeapon* GetCurrentWeapon() const { return CurrentWeapon; }
+	
 	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	
 	void SpawnInventoryWeapons();

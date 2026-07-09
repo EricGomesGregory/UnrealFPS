@@ -40,6 +40,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	FRotator GetFixedAimedRotation() const;
 	
+	UPROPERTY(BlueprintReadOnly, Category="FPS|Character|Animation")
+	FTransform FABRICK_SocketTransform;
+	
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="FPS|Character")
 	TObjectPtr<UCombatComponent> CombatComponent;
@@ -57,4 +60,7 @@ protected:
 	virtual void BeginPlay() override;
 	
 	virtual void BeginDestroy() override;
+	
+private:
+	void FABRIK_CalculateSocketTransform();
 };
