@@ -43,7 +43,7 @@ void UCombatComponent::SpawnInventoryWeapons()
 {
 	if (GetOwner()->GetLocalRole() == ROLE_Authority)
 	{
-		for (TSubclassOf<AWeapon> WeaponClass : DefaultWeaponClasses)
+		for (const TSubclassOf<AWeapon> WeaponClass : DefaultWeaponClasses)
 		{
 			AWeapon* WeaponInstance = SpawnWeapon(WeaponClass);
 			if (IsValid(WeaponInstance))
