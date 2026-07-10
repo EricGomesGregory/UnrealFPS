@@ -88,6 +88,8 @@ private:
 	
 	bool bFiring;
 	
+	int32 BurstCount;
+	
 	FTimerHandle FireTimer;
 	
 private:

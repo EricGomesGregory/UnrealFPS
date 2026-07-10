@@ -21,6 +21,7 @@ UCombatComponent::UCombatComponent()
 	
 	TraceLength = 20000.0f;
 	bFiring = false;
+	BurstCount = 0;
 }
 
 void UCombatComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
@@ -202,17 +203,37 @@ void UCombatComponent::Local_FireWeapon()
 		? HitResult.PhysMaterial->SurfaceType.GetValue() : SurfaceType1;
 			
 		CurrentWeapon->Local_Fire(HitResult.ImpactPoint, HitResult.ImpactNormal, ImpactSurfaceType, true);
-			
+		if (CurrentWeapon->GetFireMode() == EFPSFireType::Burst)
+		{
+			UE_LOG(LogTemp, Display, TEXT("Burst=%d"), BurstCount);
+			BurstCount++;
+		}
+		
 		GetWorld()->GetTimerManager().SetTimer(FireTimer, this, &ThisClass::FireTimerFinished, CurrentWeapon->GetFireRate());
-			
+		
 		Server_FireWeapon(HitResult);	
 	}
 }
 
 void UCombatComponent::FireTimerFinished()
 {
-	if (CurrentWeapon->GetFireMode() == EFPSFireType::Auto && bFiring)
+	if (CurrentWeapon->GetFireMode() == EFPSFireType::Auto)
 	{
-		Local_FireWeapon();
+		if (bFiring)
+		{
+			Local_FireWeapon();
+		}
 	}
+	else if (CurrentWeapon->GetFireMode() == EFPSFireType::Burst)
+	{
+		if (BurstCount < CurrentWeapon->GetBurstCount())
+		{
+			Local_FireWeapon();
+		}
+		else
+		{
+			BurstCount = 0;
+		}
+	}
+	
 }

@@ -37,6 +37,9 @@ public:
 	UFUNCTION(BlueprintPure, Category="FPS|Weapon")
 	EFPSFireType GetFireMode() const { return FireMode; }
 	
+	UFUNCTION(BlueprintPure, Category="FPS|Weapon")
+	int32 GetBurstCount() const { return BurstCount; }
+	
 	/** Returns the time between shots in seconds */
 	UFUNCTION(BlueprintPure, Category="FPS|Weapon")
 	float GetFireRate() const { return 36.0f / RoundsPerMinute; }
@@ -69,7 +72,11 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPS|Weapon")
 	TEnumAsByte<EFPSFireType> FireMode;
 	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPS|Weapon", meta=(ClampMin = 150.0f, ClampMax = 900.0f))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPS|Weapon", meta=(EditConditionHides, EditCondition="FireMode==EFPSFireType::Burst"))
+	int32 BurstCount;
+	
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPS|Weapon", meta=(ClampMin = 150.0f, ClampMax = 900.0f, EditConditionHides, EditCondition="FireMode!=EFPSFireType::SemiAuto"))
 	float RoundsPerMinute;
 	
 	/** */

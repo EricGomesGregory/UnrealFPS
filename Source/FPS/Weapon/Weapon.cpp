@@ -37,6 +37,7 @@ AWeapon::AWeapon()
 	TraceRadius = 5.0f;
 	FireMode = EFPSFireType::SemiAuto;
 	RoundsPerMinute = 300.0f;
+	BurstCount = 3;
 }
 
 void AWeapon::SetFirstPersonMeshHiddenInGame(bool NewHidden)
