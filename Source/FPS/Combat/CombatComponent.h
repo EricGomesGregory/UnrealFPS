@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameFramework/Pawn.h"
 #include "GameFramework/Actor.h"
 #include "Components/ActorComponent.h"
 #include "CombatComponent.generated.h"
@@ -21,6 +22,9 @@ public:
 	UCombatComponent();
 	
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+	
+	UFUNCTION(BlueprintPure, Category="FPS")
+	APawn* GetOwningPawn() const { return (GetOwner() ? Cast<APawn>(GetOwner()) : nullptr); }
 	
 	/** Returns the combat component if one exists on the specified actor. */
 	UFUNCTION(BlueprintPure, Category = "FPS|Combat")
@@ -102,7 +106,7 @@ private:
 	void Server_FireWeapon(const FHitResult& HitResult);
 	
 	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_FireWeapon(const FHitResult& HitResult);
+	void Multicast_FireWeapon(const FHitResult& HitResult, int32 AuthAmmo);
 	
 	void Local_FireWeapon();
 	

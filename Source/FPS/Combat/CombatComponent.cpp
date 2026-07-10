@@ -104,8 +104,18 @@ void UCombatComponent::Initiate_CycleWeapon()
 
 void UCombatComponent::Initiate_FireWeapon_Pressed()
 {
-	bFiring = true;
-	Local_FireWeapon();
+	if (CurrentWeapon)
+	{
+		if (CurrentWeapon->GetMagazine() > 0)
+		{
+			bFiring = true;
+			Local_FireWeapon();		
+		}
+		else
+		{
+			CurrentWeapon->DryFireEffects();
+		}
+	}
 }
 
 void UCombatComponent::Initiate_FireWeapon_Released()
@@ -153,15 +163,19 @@ void UCombatComponent::Local_AimWeapon(bool bPressed)
 
 void UCombatComponent::Server_FireWeapon_Implementation(const FHitResult& HitResult)
 {
-	Multicast_FireWeapon(HitResult);
+	const bool bIsLocalHost = GetNetMode() != NM_ListenServer;
+	if (bIsLocalHost || !GetOwningPawn()->IsLocallyControlled())
+	{
+		CurrentWeapon->Auth_Fire();
+	}
+	Multicast_FireWeapon(HitResult, CurrentWeapon->GetMagazine());
 }
 
-void UCombatComponent::Multicast_FireWeapon_Implementation(const FHitResult& HitResult)
+void UCombatComponent::Multicast_FireWeapon_Implementation(const FHitResult& HitResult, int32 AuthAmmo)
 {
-	const APawn* OwingPawn = CastChecked<APawn>(GetOwner());
-	if (OwingPawn->IsLocallyControlled())
+	if (GetOwningPawn()->IsLocallyControlled())
 	{
-		
+		CurrentWeapon->Rep_Fire(AuthAmmo);
 	}
 	else
 	{
@@ -219,14 +233,15 @@ void UCombatComponent::FireTimerFinished()
 {
 	if (CurrentWeapon->GetFireMode() == EFPSFireType::Auto)
 	{
-		if (bFiring)
+		if (bFiring && CurrentWeapon->GetMagazine() > 0)
 		{
 			Local_FireWeapon();
 		}
 	}
 	else if (CurrentWeapon->GetFireMode() == EFPSFireType::Burst)
 	{
-		if (BurstCount < CurrentWeapon->GetBurstCount())
+		const int32 RemainingBurst = FMath::Max(CurrentWeapon->GetBurstCount() - BurstCount, 0);
+		if (BurstCount < CurrentWeapon->GetBurstCount() && CurrentWeapon->GetMagazine() >= RemainingBurst)
 		{
 			Local_FireWeapon();
 		}

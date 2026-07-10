@@ -38,6 +38,11 @@ AWeapon::AWeapon()
 	FireMode = EFPSFireType::SemiAuto;
 	RoundsPerMinute = 300.0f;
 	BurstCount = 3;
+	
+	MagazineSize = 10;
+	ReservesSize = 20;
+	
+	Sequence = 0;
 }
 
 void AWeapon::SetFirstPersonMeshHiddenInGame(bool NewHidden)
@@ -129,12 +134,36 @@ void AWeapon::WeaponTrace(FHitResult& OutHitResult, float TraceLength) const
 void AWeapon::Local_Fire(const FVector& ImpactPoint, const FVector& ImpactNormal, TEnumAsByte<EPhysicalSurface> ImpactSurfaceType, bool bIsFirstPerson)
 {	
 	FireEffects(ImpactPoint, ImpactNormal, ImpactSurfaceType, bIsFirstPerson);
+	
+	if (GetInstigator()->IsLocallyControlled())
+	{
+		Magazine = FMath::Clamp(Magazine - 1, 0, MagazineSize);
+		++Sequence;
+	}
+}
+
+int32 AWeapon::Auth_Fire()
+{
+	Magazine = FMath::Clamp(Magazine - 1, 0, MagazineSize);
+	return Magazine;
+}
+
+void AWeapon::Rep_Fire(int32 AuthAmmo)
+{
+	if (GetInstigator()->IsLocallyControlled())
+	{
+		Magazine = AuthAmmo;
+		--Sequence;
+		Magazine = FMath::Clamp(Magazine - Sequence, 0, MagazineSize);
+	}
 }
 
 void AWeapon::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	Magazine = MagazineSize;
+	Reserves = ReservesSize;
 }
 
 void AWeapon::OnRep_Instigator()

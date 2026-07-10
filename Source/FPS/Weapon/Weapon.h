@@ -44,6 +44,18 @@ public:
 	UFUNCTION(BlueprintPure, Category="FPS|Weapon")
 	float GetFireRate() const { return 36.0f / RoundsPerMinute; }
 	
+	UFUNCTION(BlueprintPure, Category="FPS|Weapon")
+	int32 GetMagazineSize() const { return MagazineSize; }
+	
+	UFUNCTION(BlueprintPure, Category="FPS|Weapon")
+	int32 GetMagazine() const { return Magazine; }
+	
+	UFUNCTION(BlueprintPure, Category="FPS|Weapon")
+	int32 GetReservesSize() const { return ReservesSize; }
+	
+	UFUNCTION(BlueprintPure, Category="FPS|Weapon")
+	int32 GetReserves() const { return Reserves; }
+	
 	UFUNCTION(BlueprintCallable, Category="FPS|Weapon")
 	void SetFirstPersonMeshHiddenInGame(bool NewHidden);
 	
@@ -68,6 +80,13 @@ public:
 	
 	void Local_Fire(const FVector& ImpactPoint, const FVector& ImpactNormal, TEnumAsByte<EPhysicalSurface> ImpactSurfaceType, bool bIsFirstPerson);
 	
+	int32 Auth_Fire();
+	
+	void Rep_Fire(int32 AuthAmmo);
+	
+	UFUNCTION(BlueprintImplementableEvent)
+	void DryFireEffects();
+	
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPS|Weapon")
 	TEnumAsByte<EFPSFireType> FireMode;
@@ -78,6 +97,18 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPS|Weapon", meta=(ClampMin = 150.0f, ClampMax = 900.0f, EditConditionHides, EditCondition="FireMode!=EFPSFireType::SemiAuto"))
 	float RoundsPerMinute;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPS|Weapon")
+	int32 MagazineSize;
+	
+	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category="FPS|Weapon")
+	int32 Magazine;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPS|Weapon")
+	int32 ReservesSize;
+	
+	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category="FPS|Weapon")
+	int32 Reserves;
 	
 	/** */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
@@ -96,4 +127,8 @@ protected:
 	virtual void OnRep_Instigator() override;
 	
 	void SetMeshVisibilities(const APawn* OwningPawn) const;
+	
+private:
+	/** Magazine client-side prediction counter */
+	int32 Sequence;
 };
