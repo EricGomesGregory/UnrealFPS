@@ -35,6 +35,8 @@ AWeapon::AWeapon()
 	WeaponTypeTag = ShooterGameplayTags::Weapon_Type_None;
 	AimFieldOfView = 65.0f;
 	TraceRadius = 5.0f;
+	FireMode = EFPSFireType::SemiAuto;
+	RoundsPerMinute = 300.0f;
 }
 
 void AWeapon::SetFirstPersonMeshHiddenInGame(bool NewHidden)

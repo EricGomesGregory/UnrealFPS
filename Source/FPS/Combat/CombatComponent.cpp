@@ -3,6 +3,7 @@
 
 #include "CombatComponent.h"
 
+#include "TimerManager.h"
 #include "Engine/World.h"
 #include "Net/UnrealNetwork.h"
 #include "FPS/Weapon/Weapon.h"
@@ -19,6 +20,7 @@ UCombatComponent::UCombatComponent()
 	PrimaryComponentTick.bCanEverTick = true;
 	
 	TraceLength = 20000.0f;
+	bFiring = false;
 }
 
 void UCombatComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
@@ -101,12 +103,13 @@ void UCombatComponent::Initiate_CycleWeapon()
 
 void UCombatComponent::Initiate_FireWeapon_Pressed()
 {
-	Local_FireWeapon(true);
+	bFiring = true;
+	Local_FireWeapon();
 }
 
 void UCombatComponent::Initiate_FireWeapon_Released()
 {
-	Local_FireWeapon(false);
+	bFiring = false;
 }
 
 void UCombatComponent::Initiate_ReloadWeapon()
@@ -147,12 +150,12 @@ void UCombatComponent::Local_AimWeapon(bool bPressed)
 	bAiming = bPressed;
 }
 
-void UCombatComponent::Server_FireWeapon_Implementation(bool bPressed, const FHitResult& HitResult)
+void UCombatComponent::Server_FireWeapon_Implementation(const FHitResult& HitResult)
 {
-	Multicast_FireWeapon(bPressed, HitResult);
+	Multicast_FireWeapon(HitResult);
 }
 
-void UCombatComponent::Multicast_FireWeapon_Implementation(bool bPressed, const FHitResult& HitResult)
+void UCombatComponent::Multicast_FireWeapon_Implementation(const FHitResult& HitResult)
 {
 	const APawn* OwingPawn = CastChecked<APawn>(GetOwner());
 	if (OwingPawn->IsLocallyControlled())
@@ -178,31 +181,38 @@ void UCombatComponent::Multicast_FireWeapon_Implementation(bool bPressed, const 
 	}
 }
 
-void UCombatComponent::Local_FireWeapon(bool bPressed)
+void UCombatComponent::Local_FireWeapon()
 {
 	ensure(WeaponsData);
 	
-	if (bPressed)
+	if (IsValid(CurrentWeapon))
 	{
-		if (IsValid(CurrentWeapon))
+		if (const auto* FirstPersonMesh = IPlayerInterface::Execute_GetFirstPersonSkeletalMeshComponent(GetOwner()))
 		{
-			if (const auto* FirstPersonMesh = IPlayerInterface::Execute_GetFirstPersonSkeletalMeshComponent(GetOwner()))
-			{
-				const auto& FirsPersonMontages = WeaponsData->FirstPersonMontages.FindChecked(CurrentWeapon->WeaponTypeTag);
-				UAnimMontage* FirstPersonMontage = FirsPersonMontages.FireMontage;
+			const auto& FirsPersonMontages = WeaponsData->FirstPersonMontages.FindChecked(CurrentWeapon->WeaponTypeTag);
+			UAnimMontage* FirstPersonMontage = FirsPersonMontages.FireMontage;
 		
-				FirstPersonMesh->GetAnimInstance()->Montage_Play(FirstPersonMontage);
-			}
-	
-			FHitResult HitResult;
-			CurrentWeapon->WeaponTrace(HitResult, TraceLength);
-
-			const EPhysicalSurface ImpactSurfaceType = HitResult.PhysMaterial.IsValid(false) 
-			? HitResult.PhysMaterial->SurfaceType.GetValue() : SurfaceType1;
-			
-			CurrentWeapon->Local_Fire(HitResult.ImpactPoint, HitResult.ImpactNormal, ImpactSurfaceType, true);
-			
-			Server_FireWeapon(bPressed, HitResult);	
+			FirstPersonMesh->GetAnimInstance()->Montage_Play(FirstPersonMontage);
 		}
+	
+		FHitResult HitResult;
+		CurrentWeapon->WeaponTrace(HitResult, TraceLength);
+
+		const EPhysicalSurface ImpactSurfaceType = HitResult.PhysMaterial.IsValid(false) 
+		? HitResult.PhysMaterial->SurfaceType.GetValue() : SurfaceType1;
+			
+		CurrentWeapon->Local_Fire(HitResult.ImpactPoint, HitResult.ImpactNormal, ImpactSurfaceType, true);
+			
+		GetWorld()->GetTimerManager().SetTimer(FireTimer, this, &ThisClass::FireTimerFinished, CurrentWeapon->GetFireRate());
+			
+		Server_FireWeapon(HitResult);	
+	}
+}
+
+void UCombatComponent::FireTimerFinished()
+{
+	if (CurrentWeapon->GetFireMode() == EFPSFireType::Auto && bFiring)
+	{
+		Local_FireWeapon();
 	}
 }

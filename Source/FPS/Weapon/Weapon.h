@@ -9,6 +9,14 @@
 
 enum EPhysicalSurface : int;
 
+UENUM(BlueprintType)
+enum EFPSFireType : uint8
+{
+	SemiAuto UMETA(DisplayName="SemiAutomatic"),
+	Burst UMETA(DisplayName="Burst"),
+	Auto UMETA(DisplayName="Automatic"),
+};
+
 UCLASS()
 class FPS_API AWeapon : public AActor
 {
@@ -25,6 +33,13 @@ public:
 	
 	//UFUNCTION(BlueprintPure, Category="FPS|Weapon")
 	//FGameplayTag GetWeaponTypeTag() const { return WeaponTypeTag; }
+	
+	UFUNCTION(BlueprintPure, Category="FPS|Weapon")
+	EFPSFireType GetFireMode() const { return FireMode; }
+	
+	/** Returns the time between shots in seconds */
+	UFUNCTION(BlueprintPure, Category="FPS|Weapon")
+	float GetFireRate() const { return 36.0f / RoundsPerMinute; }
 	
 	UFUNCTION(BlueprintCallable, Category="FPS|Weapon")
 	void SetFirstPersonMeshHiddenInGame(bool NewHidden);
@@ -51,6 +66,11 @@ public:
 	void Local_Fire(const FVector& ImpactPoint, const FVector& ImpactNormal, TEnumAsByte<EPhysicalSurface> ImpactSurfaceType, bool bIsFirstPerson);
 	
 protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPS|Weapon")
+	TEnumAsByte<EFPSFireType> FireMode;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPS|Weapon", meta=(ClampMin = 150.0f, ClampMax = 900.0f))
+	float RoundsPerMinute;
 	
 	/** */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
@@ -59,7 +79,7 @@ protected:
 	/** */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<USkeletalMeshComponent> ThirdPersonMesh;
-	
+
 protected:
 	virtual void BeginPlay() override;
 
