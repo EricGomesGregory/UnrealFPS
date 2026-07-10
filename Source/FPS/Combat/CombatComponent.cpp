@@ -7,11 +7,18 @@
 #include "Net/UnrealNetwork.h"
 #include "FPS/Weapon/Weapon.h"
 #include "GameFramework/Pawn.h"
+#include "FPS/Weapon/WeaponData.h"
+#include "Animation/AnimInstance.h"
+#include "FPS/Interfaces/PlayerInterface.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "PhysicalMaterials/PhysicalMaterial.h"
 
 
 UCombatComponent::UCombatComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
+	
+	TraceLength = 20000.0f;
 }
 
 void UCombatComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
@@ -70,8 +77,8 @@ void UCombatComponent::Equip(AWeapon* Weapon)
 
 void UCombatComponent::Initiate_AimWeapon_Pressed()
 {
-	Local_Aim(true);
-	Server_Aim(true);
+	Local_AimWeapon(true);
+	Server_AimWeapon(true);
 	
 	auto* Owner = GetOwner();
 	check(Owner);
@@ -81,8 +88,8 @@ void UCombatComponent::Initiate_AimWeapon_Pressed()
 
 void UCombatComponent::Initiate_AimWeapon_Released()
 {
-	Local_Aim(false);
-	Server_Aim(false);
+	Local_AimWeapon(false);
+	Server_AimWeapon(false);
 	
 	OnAimWeapon.Broadcast(false);
 }
@@ -94,12 +101,12 @@ void UCombatComponent::Initiate_CycleWeapon()
 
 void UCombatComponent::Initiate_FireWeapon_Pressed()
 {
-	UE_LOG(LogTemp, Display, TEXT("FireWeapon::Pressed"));
+	Local_FireWeapon(true);
 }
 
 void UCombatComponent::Initiate_FireWeapon_Released()
 {
-	UE_LOG(LogTemp, Display, TEXT("FireWeapon::Released"));
+	Local_FireWeapon(false);
 }
 
 void UCombatComponent::Initiate_ReloadWeapon()
@@ -130,12 +137,72 @@ void UCombatComponent::OnRep_CurrentWeapon(AWeapon* LastWeapon)
 	}
 }
 
-void UCombatComponent::Server_Aim_Implementation(bool bPressed)
+void UCombatComponent::Server_AimWeapon_Implementation(bool bPressed)
 {
-	Local_Aim(bPressed);
+	Local_AimWeapon(bPressed);
 }
 
-void UCombatComponent::Local_Aim(bool bPressed)
+void UCombatComponent::Local_AimWeapon(bool bPressed)
 {
 	bAiming = bPressed;
+}
+
+void UCombatComponent::Server_FireWeapon_Implementation(bool bPressed, const FHitResult& HitResult)
+{
+	Multicast_FireWeapon(bPressed, HitResult);
+}
+
+void UCombatComponent::Multicast_FireWeapon_Implementation(bool bPressed, const FHitResult& HitResult)
+{
+	const APawn* OwingPawn = CastChecked<APawn>(GetOwner());
+	if (OwingPawn->IsLocallyControlled())
+	{
+		
+	}
+	else
+	{
+		ensure(WeaponsData);
+		
+		if (const auto* ThirdPersonMesh = IPlayerInterface::Execute_GetThirdPersonSkeletalMeshComponent(GetOwner()))
+		{
+			const auto& ThirdPersonMontages = WeaponsData->ThirdPersonMontages.FindChecked(CurrentWeapon->WeaponTypeTag);
+			UAnimMontage* ThirdPersonMontage = ThirdPersonMontages.FireMontage;
+			
+			ThirdPersonMesh->GetAnimInstance()->Montage_Play(ThirdPersonMontage);
+
+			const EPhysicalSurface ImpactSurfaceType = HitResult.PhysMaterial.IsValid(false) 
+			? HitResult.PhysMaterial->SurfaceType.GetValue() : SurfaceType1;
+			
+			CurrentWeapon->Local_Fire(HitResult.ImpactPoint, HitResult.ImpactNormal, ImpactSurfaceType, false);
+		}
+	}
+}
+
+void UCombatComponent::Local_FireWeapon(bool bPressed)
+{
+	ensure(WeaponsData);
+	
+	if (bPressed)
+	{
+		if (IsValid(CurrentWeapon))
+		{
+			if (const auto* FirstPersonMesh = IPlayerInterface::Execute_GetFirstPersonSkeletalMeshComponent(GetOwner()))
+			{
+				const auto& FirsPersonMontages = WeaponsData->FirstPersonMontages.FindChecked(CurrentWeapon->WeaponTypeTag);
+				UAnimMontage* FirstPersonMontage = FirsPersonMontages.FireMontage;
+		
+				FirstPersonMesh->GetAnimInstance()->Montage_Play(FirstPersonMontage);
+			}
+	
+			FHitResult HitResult;
+			CurrentWeapon->WeaponTrace(HitResult, TraceLength);
+
+			const EPhysicalSurface ImpactSurfaceType = HitResult.PhysMaterial.IsValid(false) 
+			? HitResult.PhysMaterial->SurfaceType.GetValue() : SurfaceType1;
+			
+			CurrentWeapon->Local_Fire(HitResult.ImpactPoint, HitResult.ImpactNormal, ImpactSurfaceType, true);
+			
+			Server_FireWeapon(bPressed, HitResult);	
+		}
+	}
 }

@@ -3,8 +3,11 @@
 
 #include "Weapon.h"
 
+#include "FPS/FPS.h"
+#include "KismetTraceUtils.h"
 #include "GameFramework/Pawn.h"
 #include "FPS/FPSGameplayTags.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "FPS/Interfaces/PlayerInterface.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -31,6 +34,7 @@ AWeapon::AWeapon()
 	
 	WeaponTypeTag = ShooterGameplayTags::Weapon_Type_None;
 	AimFieldOfView = 65.0f;
+	TraceRadius = 5.0f;
 }
 
 void AWeapon::SetFirstPersonMeshHiddenInGame(bool NewHidden)
@@ -58,6 +62,70 @@ void AWeapon::AttachToOwningPawn() const
 		FirstPersonMesh->AttachToComponent(PawnFirstPersonMesh, FAttachmentTransformRules::KeepRelativeTransform, AttachmentSocketName);
 		ThirdPersonMesh->AttachToComponent(PawnThirdPersonMesh, FAttachmentTransformRules::KeepRelativeTransform, AttachmentSocketName);
 	}
+}
+
+void AWeapon::WeaponTrace(FHitResult& OutHitResult, float TraceLength) const
+{
+	ensure(GetInstigator());
+	
+	if (auto* PC = Cast<APlayerController>(GetInstigator()->GetController()))
+	{
+		FCollisionQueryParams TraceParameters;
+		TraceParameters.bReturnPhysicalMaterial = true;
+		TraceParameters.AddIgnoredActor(GetOwner());
+	
+		FCollisionResponseParams ResponseParams;
+		ResponseParams.CollisionResponse.SetResponse(ECC_Pawn, ECR_Block);
+		ResponseParams.CollisionResponse.SetResponse(ECC_WorldStatic, ECR_Block);
+		ResponseParams.CollisionResponse.SetResponse(ECC_WorldDynamic, ECR_Block);
+		ResponseParams.CollisionResponse.SetResponse(ECC_PhysicsBody, ECR_Block);
+		ResponseParams.CollisionResponse.SetResponse(FPSTraceChannels::ECC_Weapon, ECR_Ignore);
+		
+		FVector EyesWorldLocation;
+		FRotator EyesWorldRotation;
+		PC->GetActorEyesViewPoint(EyesWorldLocation, EyesWorldRotation);
+		const FVector EyesWorldDirection = UKismetMathLibrary::GetForwardVector(EyesWorldRotation);
+		
+		const FVector Start = EyesWorldLocation;
+		const FVector End = Start + (EyesWorldDirection * TraceLength);
+		
+		const bool bHit = GetWorld()->SweepSingleByChannel(
+			OutHitResult, 
+			Start, 
+			End, 
+			FQuat::Identity, 
+			FPSTraceChannels::ECC_Weapon,
+			FCollisionShape::MakeSphere(TraceRadius), 
+			TraceParameters,
+			ResponseParams);
+	
+		if (bHit == false)
+		{
+			OutHitResult.ImpactPoint = End;
+		}
+		
+#if !UE_BUILD_SHIPPING
+		if (bDebugWeapon)
+		{
+			DrawDebugSphereTraceSingle(
+			GetWorld(),
+			Start,
+			End,
+			TraceRadius,
+			EDrawDebugTrace::ForDuration,
+			bHit,
+			OutHitResult,
+			FColor::Green,
+			FColor::Red,
+			5.0f);
+		}
+#endif
+	}
+}
+
+void AWeapon::Local_Fire(const FVector& ImpactPoint, const FVector& ImpactNormal, TEnumAsByte<EPhysicalSurface> ImpactSurfaceType, bool bIsFirstPerson)
+{	
+	FireEffects(ImpactPoint, ImpactNormal, ImpactSurfaceType, bIsFirstPerson);
 }
 
 void AWeapon::BeginPlay()

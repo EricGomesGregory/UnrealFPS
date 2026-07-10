@@ -63,12 +63,20 @@ public:
 	
 	mutable FCombatToggleActionEvent OnAimWeapon;
 	
+	UPROPERTY(BlueprintReadOnly, Replicated, Category="FPS|Weapon")
+	bool bFiring;
+	
+	mutable FCombatToggleActionEvent OnFireWeapon;
+	
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPS|Weapon")
 	TObjectPtr<UWeaponData> WeaponsData;
 
 	UPROPERTY(EditDefaultsOnly, Category="FPS|Weapon")
 	TArray<TSubclassOf<AWeapon>> DefaultWeaponClasses;
+	
+	UPROPERTY(EditDefaultsOnly, Category="FPS|Weapon")
+	float TraceLength;
 	
 	AWeapon* SpawnWeapon(TSubclassOf<AWeapon> WeaponClass) const;
 	
@@ -85,7 +93,15 @@ private:
 	
 private:
 	UFUNCTION(Server, Reliable)
-	void Server_Aim(bool bPressed);
+	void Server_AimWeapon(bool bPressed);
 	
-	void Local_Aim(bool bPressed);
+	void Local_AimWeapon(bool bPressed);
+	
+	UFUNCTION(Server, Reliable)
+	void Server_FireWeapon(bool bPressed, const FHitResult& HitResult);
+	
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_FireWeapon(bool bPressed, const FHitResult& HitResult);
+	
+	void Local_FireWeapon(bool bPressed);
 };

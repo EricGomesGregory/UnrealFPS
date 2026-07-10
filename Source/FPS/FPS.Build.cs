@@ -15,6 +15,7 @@ public class FPS : ModuleRules
 			"InputCore",
 			"EnhancedInput",
 			"GameplayTags",
+			"PhysicsCore",
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] { });
