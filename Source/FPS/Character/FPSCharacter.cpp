@@ -49,6 +49,8 @@ AFPSCharacter::AFPSCharacter()
 	
 	TurningStatus = EFPSTurningInPlace::NotTurning;
 	TurnInPlaceInterpolationSpeed = 4.0f;
+	
+	bWeaponFirstReplicated = false;
 }
 
 FName AFPSCharacter::GetWeaponAttachPointSocketName_Implementation(const FGameplayTag& WeaponTyeTag) const
@@ -67,6 +69,20 @@ USkeletalMeshComponent* AFPSCharacter::GetFirstPersonSkeletalMeshComponent_Imple
 USkeletalMeshComponent* AFPSCharacter::GetThirdPersonSkeletalMeshComponent_Implementation() const
 {
 	return GetMesh();
+}
+
+void AFPSCharacter::WeaponReplicated_Implementation()
+{
+	if (!bWeaponFirstReplicated)
+	{
+		bWeaponFirstReplicated = true;
+		OnWeaponFirstReplicated.Broadcast(CombatComponent->GetCurrentWeapon());
+	}
+}
+
+AWeapon* AFPSCharacter::GetCurrentWeapon_Implementation() const
+{
+	return CombatComponent->GetCurrentWeapon();
 }
 
 void AFPSCharacter::BeginPlay()

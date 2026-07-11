@@ -13,6 +13,8 @@ class UCombatComponent;
 class UCameraComponent;
 class USpringArmComponent;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FFPSWeaponFirstReplicated, AWeapon*, Weapon);
+
 UCLASS()
 class FPS_API AFPSCharacter : public ACharacter,
 public IPlayerInterface
@@ -26,6 +28,8 @@ public:
 	virtual FName GetWeaponAttachPointSocketName_Implementation(const FGameplayTag& WeaponTyeTag) const override;
 	virtual USkeletalMeshComponent* GetFirstPersonSkeletalMeshComponent_Implementation() const override;
 	virtual USkeletalMeshComponent* GetThirdPersonSkeletalMeshComponent_Implementation() const override;
+	virtual void WeaponReplicated_Implementation() override;
+	AWeapon* GetCurrentWeapon_Implementation() const override;
 	//~End IPlayerInterface
 	
 	virtual void Tick(float DeltaTime) override;
@@ -56,6 +60,12 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category="FPS|Character|Animation")
 	bool HasCurrentWeapon() const { return (CombatComponent ? CombatComponent->GetCurrentWeapon() != nullptr : false); }
+	
+	bool HasWeaponFirstReplicated() const { return bWeaponFirstReplicated; }
+	
+	/** Delegate for client synchronization */
+	UPROPERTY(BlueprintAssignable)
+	FFPSWeaponFirstReplicated OnWeaponFirstReplicated;
 	
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="FPS|Character")
@@ -92,4 +102,6 @@ private:
 	FRotator StartingRotation;
 	
 	float InterpAO_Yaw;
+	
+	bool bWeaponFirstReplicated;
 };

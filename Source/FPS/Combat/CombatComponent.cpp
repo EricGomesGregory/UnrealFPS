@@ -34,6 +34,20 @@ void UCombatComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty
 	DOREPLIFETIME_CONDITION(ThisClass, bAiming, COND_SkipOwner);
 }
 
+void UCombatComponent::InitializeWeaponWidgets()
+{
+	if (IsValid(CurrentWeapon))
+	{
+		auto* CrosshairDynMatInst = CurrentWeapon->GetCrosshairDynamicMaterialInstance();
+		OnCrosshairChanged.Broadcast(CrosshairDynMatInst);
+		
+		auto* MagazineDynMatInst = CurrentWeapon->GetMagazineDynamicMaterialInstance();
+		const int32 Magazine = CurrentWeapon->GetMagazine();
+		const int32 MagazineSize = CurrentWeapon->GetMagazineSize();
+		OnMagazineChanged.Broadcast(MagazineDynMatInst, Magazine, MagazineSize);
+	}
+}
+
 void UCombatComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
@@ -57,6 +71,7 @@ void UCombatComponent::SpawnInventoryWeapons()
 		if (InventoryWeapons.Num() > 0)
 		{
 			Equip(InventoryWeapons[0]);
+			InitializeWeaponWidgets();
 		}	
 	}
 }
@@ -148,6 +163,8 @@ void UCombatComponent::OnRep_CurrentWeapon(AWeapon* LastWeapon)
 	if (IsValid(CurrentWeapon))
 	{
 		CurrentWeapon->AttachToOwningPawn();
+		IPlayerInterface::Execute_WeaponReplicated(GetOwner());
+		InitializeWeaponWidgets();
 	}
 }
 

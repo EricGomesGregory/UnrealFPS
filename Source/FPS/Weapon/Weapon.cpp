@@ -11,6 +11,7 @@
 #include "FPS/Interfaces/PlayerInterface.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Materials/MaterialInstanceDynamic.h"
 
 
 AWeapon::AWeapon()
@@ -53,6 +54,28 @@ void AWeapon::SetFirstPersonMeshHiddenInGame(bool NewHidden)
 void AWeapon::SetThirdPersonMeshHiddenInGame(bool NewHidden)
 {
 	ThirdPersonMesh->SetHiddenInGame(NewHidden);
+}
+
+UMaterialInstanceDynamic* AWeapon::GetCrosshairDynamicMaterialInstance()
+{
+	if (!IsValid(DynMatInst_Crosshair))
+	{
+		DynMatInst_Crosshair = UMaterialInstanceDynamic::Create(CrosshairMaterial, this);
+	}
+		
+	return DynMatInst_Crosshair;
+	
+	
+}
+
+UMaterialInstanceDynamic* AWeapon::GetMagazineDynamicMaterialInstance()
+{
+	if (!IsValid(DynMatInst_Magazine))
+	{
+		DynMatInst_Magazine = UMaterialInstanceDynamic::Create(MagazineMaterial, this);
+	}
+	
+	return DynMatInst_Magazine;
 }
 
 void AWeapon::AttachToOwningPawn() const

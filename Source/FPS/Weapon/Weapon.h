@@ -3,9 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameplayTagContainer.h"
 #include "GameFramework/Actor.h"
+#include "GameplayTagContainer.h"
 #include "Weapon.generated.h"
+
+class UMaterialInstanceDynamic;
 
 enum EPhysicalSurface : int;
 
@@ -62,6 +64,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category="FPS|Weapon")
 	void SetThirdPersonMeshHiddenInGame(bool NewHidden);
 	
+	/**  */
+	UMaterialInstanceDynamic* GetCrosshairDynamicMaterialInstance();
+	
+	/**  */
+	UMaterialInstanceDynamic* GetMagazineDynamicMaterialInstance();
+	
 	void AttachToOwningPawn() const;
 	
 	void WeaponTrace(FHitResult& OutHitResult, float TraceLength) const;
@@ -110,6 +118,12 @@ protected:
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category="FPS|Weapon")
 	int32 Reserves;
 	
+	UPROPERTY(EditDefaultsOnly, Category="FPS|Weapon|UI")
+	TObjectPtr<UMaterialInterface> CrosshairMaterial;
+	
+	UPROPERTY(EditDefaultsOnly, Category="FPS|Weapon|UI")
+	TObjectPtr<UMaterialInterface> MagazineMaterial;
+	
 	/** */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<USkeletalMeshComponent> FirstPersonMesh;
@@ -131,4 +145,12 @@ protected:
 private:
 	/** Magazine client-side prediction counter */
 	int32 Sequence;
+	
+	/** */
+	UPROPERTY()
+	TObjectPtr<UMaterialInstanceDynamic> DynMatInst_Crosshair;
+	
+	/** */
+	UPROPERTY()
+	TObjectPtr<UMaterialInstanceDynamic> DynMatInst_Magazine;
 };

@@ -6,6 +6,7 @@
 #include "UObject/Interface.h"
 #include "PlayerInterface.generated.h"
 
+class AWeapon;
 struct FGameplayTag;
 
 
@@ -31,4 +32,10 @@ public:
 	
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	USkeletalMeshComponent* GetThirdPersonSkeletalMeshComponent() const;
+	
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void WeaponReplicated();
+	
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	AWeapon* GetCurrentWeapon() const;
 };

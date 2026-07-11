@@ -10,8 +10,11 @@
 
 class AWeapon;
 class UWeaponData;
+class UMaterialInstanceDynamic;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCombatToggleActionEvent, bool, bPressed);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCombatCrosshairChanged, UMaterialInstanceDynamic*, CrosshairDynMatInst);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FCombatMagazineChanged, UMaterialInstanceDynamic*, CrosshairDynMatInst, int32, Current, int32, Size);
 
 UCLASS()
 class FPS_API UCombatComponent : public UActorComponent
@@ -34,6 +37,8 @@ public:
 	
 	UFUNCTION(BlueprintPure, Category = "FPS|Combat")
 	AWeapon* GetCurrentWeapon() const { return CurrentWeapon; }
+	
+	void InitializeWeaponWidgets();
 	
 	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	
@@ -66,6 +71,10 @@ public:
 	bool bAiming;
 	
 	mutable FCombatToggleActionEvent OnAimWeapon;
+	
+	FCombatCrosshairChanged OnCrosshairChanged;
+	
+	FCombatMagazineChanged OnMagazineChanged;
 	
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPS|Weapon")
