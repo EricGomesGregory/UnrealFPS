@@ -34,6 +34,18 @@ void UFPSCrosshairWidget::NativeOnInitialized()
 		{
 			FPSCharacter->OnWeaponFirstReplicated.AddDynamic(this, &ThisClass::OnWeaponFirstReplicated);
 		}
+		
+		if (FPSCharacter->HasAuthority())
+		{
+			if (auto* CurrentWeapon = IPlayerInterface::Execute_GetCurrentWeapon(FPSCharacter))
+			{
+				OnCrosshairChanged(CurrentWeapon->GetCrosshairDynamicMaterialInstance());
+				
+				const int32 Magazine = CurrentWeapon->GetMagazine();
+				const int32 MagazineSize = CurrentWeapon->GetMagazineSize();
+				OnMagazineChanged(CurrentWeapon->GetMagazineDynamicMaterialInstance(), Magazine, MagazineSize);
+			}
+		}
 	}
 }
 
