@@ -91,6 +91,8 @@ protected:
 	
 	virtual void BeginDestroy() override;
 	
+	virtual void OnRep_PlayerState() override;
+	
 private:
 	void FABRIK_CalculateSocketTransform();
 	

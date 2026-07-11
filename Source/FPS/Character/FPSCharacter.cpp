@@ -105,6 +105,16 @@ void AFPSCharacter::BeginDestroy()
 	}
 }
 
+void AFPSCharacter::OnRep_PlayerState()
+{
+	Super::OnRep_PlayerState();
+	
+	if (CombatComponent)
+	{
+		CombatComponent->InitializeWeaponWidgets();	
+	}
+}
+
 void AFPSCharacter::Tick(const float DeltaTime)
 {
 	Super::Tick(DeltaTime);
