@@ -3,6 +3,7 @@
 
 #include "FPSCrosshairWidget.h"
 
+#include "LightmapResRatioAdjust.h"
 #include "Components/Image.h"
 #include "FPS/Weapon/Weapon.h"
 #include "FPS/Character/FPSCharacter.h"
@@ -18,6 +19,7 @@ namespace Crosshair
 {
 	const FName RoundedCornerScale = FName("RoundedCornerScale");
 	const FName ShapeCutThickness = FName("ShapeCutThickness");
+	const FName CrosshairColor = FName("Inner_RGBA");
 }
 
 void UFPSCrosshairWidget::NativeOnInitialized()
@@ -41,7 +43,7 @@ void UFPSCrosshairWidget::NativeOnInitialized()
 		{
 			if (auto* CurrentWeapon = IPlayerInterface::Execute_GetCurrentWeapon(FPSCharacter))
 			{
-				OnCrosshairChanged(CurrentWeapon->GetCrosshairDynamicMaterialInstance(), CurrentWeapon->GetCrosshairParams());
+				OnCrosshairChanged(CurrentWeapon->GetCrosshairDynamicMaterialInstance(), CurrentWeapon->GetCrosshairParams(), bTargetingPlayer);
 				
 				const int32 Magazine = CurrentWeapon->GetMagazine();
 				const int32 MagazineSize = CurrentWeapon->GetMagazineSize();
@@ -57,7 +59,7 @@ void UFPSCrosshairWidget::NativeOnInitialized()
 		{
 			if (auto* CurrentWeapon = IPlayerInterface::Execute_GetCurrentWeapon(FPSCharacter))
 			{
-				OnCrosshairChanged(CurrentWeapon->GetCrosshairDynamicMaterialInstance(), CurrentWeapon->GetCrosshairParams());
+				OnCrosshairChanged(CurrentWeapon->GetCrosshairDynamicMaterialInstance(), CurrentWeapon->GetCrosshairParams(), bTargetingPlayer);
 				
 				const int32 Magazine = CurrentWeapon->GetMagazine();
 				const int32 MagazineSize = CurrentWeapon->GetMagazineSize();
@@ -98,6 +100,7 @@ void UFPSCrosshairWidget::OnPossessedPawnChanged(APawn* OldPawn, APawn* NewPawn)
 		OldCombatComponent->OnCrosshairChanged.RemoveDynamic(this, &ThisClass::OnCrosshairChanged);
 		OldCombatComponent->OnMagazineChanged.RemoveDynamic(this, &ThisClass::OnMagazineChanged);
 		OldCombatComponent->OnAimWeapon.RemoveDynamic(this, &ThisClass::OnAimChanged);
+		OldCombatComponent->OnTargetingPlayer.RemoveDynamic(this, &ThisClass::OnTargetingPlayerChanged);
 		OldCombatComponent->OnRoundFired.RemoveDynamic(this, &ThisClass::OnRoundFired);
 	}
 	
@@ -108,27 +111,30 @@ void UFPSCrosshairWidget::OnPossessedPawnChanged(APawn* OldPawn, APawn* NewPawn)
 		CombatComponent->OnCrosshairChanged.AddDynamic(this, &ThisClass::OnCrosshairChanged);
 		CombatComponent->OnMagazineChanged.AddDynamic(this, &ThisClass::OnMagazineChanged);
 		CombatComponent->OnAimWeapon.AddDynamic(this, &ThisClass::OnAimChanged);
+		CombatComponent->OnTargetingPlayer.AddDynamic(this, &ThisClass::OnTargetingPlayerChanged);
 		CombatComponent->OnRoundFired.AddDynamic(this, &ThisClass::OnRoundFired);
 	}
 }
 
 void UFPSCrosshairWidget::OnWeaponFirstReplicated(AWeapon* Weapon)
 {
-	OnCrosshairChanged(Weapon->GetCrosshairDynamicMaterialInstance(), Weapon->GetCrosshairParams());
+	OnCrosshairChanged(Weapon->GetCrosshairDynamicMaterialInstance(), Weapon->GetCrosshairParams(), bTargetingPlayer);
 	
 	const int32 Magazine = Weapon->GetMagazine();
 	const int32 MagazineSize = Weapon->GetMagazineSize();
 	OnMagazineChanged(Weapon->GetMagazineDynamicMaterialInstance(), Magazine, MagazineSize);
 }
 
-void UFPSCrosshairWidget::OnCrosshairChanged(UMaterialInstanceDynamic* CrosshairDynMatInst, const FFPSCrosshairParams& CrosshairParams)
+void UFPSCrosshairWidget::OnCrosshairChanged(UMaterialInstanceDynamic* CrosshairDynMatInst, const FFPSCrosshairParams& CrosshairParams, const bool bInTargetingPlayer)
 {
 	CurrentCrosshairParams = CrosshairParams;
 	CurrentCrosshair_DynMatInst = CrosshairDynMatInst;
 	if (CurrentCrosshair_DynMatInst.IsValid())
 	{
 		CurrentCrosshair_DynMatInst->GetScalarParameterValue(Crosshair::RoundedCornerScale, BaseCornerScaleFactor);
-		CurrentCrosshair_DynMatInst->GetScalarParameterValue(Crosshair::ShapeCutThickness, BaseShapeCutThicknessFactor); 
+		CurrentCrosshair_DynMatInst->GetScalarParameterValue(Crosshair::ShapeCutThickness, BaseShapeCutThicknessFactor);
+		auto TargetColor = bInTargetingPlayer ? FLinearColor::Red : FLinearColor::White;
+		CurrentCrosshair_DynMatInst->GetVectorParameterValue(Crosshair::CrosshairColor, TargetColor);
 	}
 	
 	FSlateBrush Brush;
@@ -154,6 +160,18 @@ void UFPSCrosshairWidget::OnMagazineChanged(UMaterialInstanceDynamic* MagazineDy
 void UFPSCrosshairWidget::OnAimChanged(bool bInAiming)
 {
 	bAiming = bInAiming;
+}
+
+void UFPSCrosshairWidget::OnTargetingPlayerChanged(bool bInTargetingPlayer)
+{
+	bTargetingPlayer = bInTargetingPlayer;
+	
+	if (CurrentCrosshair_DynMatInst.IsValid())
+	{
+		const FLinearColor TargetingColor = FLinearColor::Red; // @Eric TODO: Move to a PlayerSetting 
+		const FLinearColor NewColor = bTargetingPlayer ? TargetingColor : FLinearColor::White;
+		CurrentCrosshair_DynMatInst->SetVectorParameterValue(Crosshair::CrosshairColor, NewColor);
+	}
 }
 
 void UFPSCrosshairWidget::OnRoundFired(int32 Current, int32 Size)

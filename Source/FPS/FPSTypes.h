@@ -35,4 +35,6 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Fireing")
 	float RoundFireInterpolationSpeed = 20.0f;
+	
+	//@Eric TODO: Maybe implement targeting scale factor and shape cut factors 
 };

@@ -12,6 +12,8 @@
 #include "Animation/AnimInstance.h"
 #include "FPS/Interfaces/PlayerInterface.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "FPS/FPS.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "PhysicalMaterials/PhysicalMaterial.h"
 
 
@@ -39,7 +41,7 @@ void UCombatComponent::InitializeWeaponWidgets()
 	if (IsValid(CurrentWeapon))
 	{
 		auto* CrosshairDynMatInst = CurrentWeapon->GetCrosshairDynamicMaterialInstance();
-		OnCrosshairChanged.Broadcast(CrosshairDynMatInst, CurrentWeapon->GetCrosshairParams());
+		OnCrosshairChanged.Broadcast(CrosshairDynMatInst, CurrentWeapon->GetCrosshairParams(), bHitPlayer);
 		
 		auto* MagazineDynMatInst = CurrentWeapon->GetMagazineDynamicMaterialInstance();
 		const int32 Magazine = CurrentWeapon->GetMagazine();
@@ -51,6 +53,43 @@ void UCombatComponent::InitializeWeaponWidgets()
 void UCombatComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	
+	auto* OwningPawn = Cast<APawn>(GetOwner());
+	checkf(OwningPawn, TEXT("\nCombatComponent must be owned by a Pawn derived class"));
+	
+	if (OwningPawn->IsLocallyControlled())
+	{
+		if (auto* PC = Cast<APlayerController>(OwningPawn->GetController()))
+		{
+			FVector EyesWorldLocation;
+			FRotator EyesWorldRotation;
+			PC->GetActorEyesViewPoint(EyesWorldLocation, EyesWorldRotation);
+			const FVector EyesWorldDirection = UKismetMathLibrary::GetForwardVector(EyesWorldRotation);
+			
+			const FVector Start = EyesWorldLocation;
+			const FVector End = Start + EyesWorldDirection * TraceLength;
+			
+			FHitResult HitResult;
+			FCollisionQueryParams QueryParams;
+			QueryParams.AddIgnoredActor(OwningPawn);
+			
+			FCollisionResponseParams ResponseParams;
+			ResponseParams.CollisionResponse.SetAllChannels(ECR_Ignore);
+			ResponseParams.CollisionResponse.SetResponse(ECC_Pawn, ECR_Block);
+			ResponseParams.CollisionResponse.SetResponse(ECC_PhysicsBody, ECR_Block);
+			
+			GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, FPSTraceChannels::ECC_Weapon, QueryParams, ResponseParams);
+			
+			bHitPlayer = IsValid(HitResult.GetActor()) && HitResult.GetActor()->Implements<UPlayerInterface>();
+			
+			if (bHitPlayer != bHitPlayerLastFrame)
+			{
+				OnTargetingPlayer.Broadcast(bHitPlayer);
+			}
+			
+			bHitPlayerLastFrame = bHitPlayer;
+		}
+	}
 }
 
 void UCombatComponent::SpawnInventoryWeapons()

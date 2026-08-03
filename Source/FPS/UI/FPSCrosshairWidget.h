@@ -36,6 +36,7 @@ protected:
 	
 	FFPSCrosshairParams CurrentCrosshairParams;
 	
+	FLinearColor BaseCrosshairColor;
 	float BaseCornerScaleFactor;
 	float BaseShapeCutThicknessFactor;
 	
@@ -54,7 +55,7 @@ protected:
 	void OnWeaponFirstReplicated(AWeapon* Weapon);
 	
 	UFUNCTION()
-	void OnCrosshairChanged(UMaterialInstanceDynamic* CrosshairDynMatInst, const FFPSCrosshairParams& CrosshairParams);
+	void OnCrosshairChanged(UMaterialInstanceDynamic* CrosshairDynMatInst, const FFPSCrosshairParams& CrosshairParams, const bool bInTargetingPlayer);
 
 	UFUNCTION()
 	void OnMagazineChanged(UMaterialInstanceDynamic* MagazineDynMatInst, int32 Current, int32 Size);
@@ -63,9 +64,15 @@ protected:
 	void OnAimChanged(bool bInAiming);
 	
 	UFUNCTION()
+	void OnTargetingPlayerChanged(bool bInTargetingPlayer);
+	
+	UFUNCTION()
 	void OnRoundFired(int32 Current, int32 Size);
 	
 private:
 	UPROPERTY()
 	bool bAiming;
+	
+	UPROPERTY()
+	bool bTargetingPlayer;
 };

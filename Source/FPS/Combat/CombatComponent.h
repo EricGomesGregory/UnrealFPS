@@ -14,7 +14,7 @@ struct FFPSCrosshairParams;
 class UMaterialInstanceDynamic;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCombatToggleActionEvent, bool, bPressed);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FCombatCrosshairChanged, UMaterialInstanceDynamic*, CrosshairDynMatInst, const FFPSCrosshairParams&, CrosshairParams);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FCombatCrosshairChanged, UMaterialInstanceDynamic*, CrosshairDynMatInst, const FFPSCrosshairParams&, CrosshairParams, bool, bTargetingPlayer);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FCombatMagazineChanged, UMaterialInstanceDynamic*, CrosshairDynMatInst, int32, Current, int32, Size);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FCombatMagazineDelegate, int32, Current, int32, Size);
 
@@ -83,6 +83,9 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FCombatMagazineDelegate OnRoundFired;
 	
+	UPROPERTY(BlueprintAssignable)
+	FCombatToggleActionEvent OnTargetingPlayer;
+	
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPS|Weapon")
 	TObjectPtr<UWeaponData> WeaponsData;
@@ -107,6 +110,9 @@ private:
 	TArray<AWeapon*> InventoryWeapons;
 	
 	bool bFiring;
+	
+	bool bHitPlayer;
+	bool bHitPlayerLastFrame;
 	
 	int32 BurstCount;
 	
