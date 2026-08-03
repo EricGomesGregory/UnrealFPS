@@ -39,7 +39,7 @@ void UCombatComponent::InitializeWeaponWidgets()
 	if (IsValid(CurrentWeapon))
 	{
 		auto* CrosshairDynMatInst = CurrentWeapon->GetCrosshairDynamicMaterialInstance();
-		OnCrosshairChanged.Broadcast(CrosshairDynMatInst);
+		OnCrosshairChanged.Broadcast(CrosshairDynMatInst, CurrentWeapon->GetCrosshairParams());
 		
 		auto* MagazineDynMatInst = CurrentWeapon->GetMagazineDynamicMaterialInstance();
 		const int32 Magazine = CurrentWeapon->GetMagazine();
@@ -240,6 +240,7 @@ void UCombatComponent::Local_FireWeapon()
 			BurstCount++;
 		}
 		
+		OnRoundFired.Broadcast(CurrentWeapon->GetMagazine(), CurrentWeapon->GetMagazineSize());
 		GetWorld()->GetTimerManager().SetTimer(FireTimer, this, &ThisClass::FireTimerFinished, CurrentWeapon->GetFireRate());
 		
 		Server_FireWeapon(HitResult);	

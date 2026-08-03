@@ -10,11 +10,13 @@
 
 class AWeapon;
 class UWeaponData;
+struct FFPSCrosshairParams;
 class UMaterialInstanceDynamic;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCombatToggleActionEvent, bool, bPressed);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCombatCrosshairChanged, UMaterialInstanceDynamic*, CrosshairDynMatInst);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FCombatCrosshairChanged, UMaterialInstanceDynamic*, CrosshairDynMatInst, const FFPSCrosshairParams&, CrosshairParams);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FCombatMagazineChanged, UMaterialInstanceDynamic*, CrosshairDynMatInst, int32, Current, int32, Size);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FCombatMagazineDelegate, int32, Current, int32, Size);
 
 UCLASS()
 class FPS_API UCombatComponent : public UActorComponent
@@ -72,9 +74,14 @@ public:
 	
 	mutable FCombatToggleActionEvent OnAimWeapon;
 	
+	UPROPERTY(BlueprintAssignable)
 	FCombatCrosshairChanged OnCrosshairChanged;
 	
+	UPROPERTY(BlueprintAssignable)
 	FCombatMagazineChanged OnMagazineChanged;
+	
+	UPROPERTY(BlueprintAssignable)
+	FCombatMagazineDelegate OnRoundFired;
 	
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPS|Weapon")

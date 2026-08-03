@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "FPS/FPSTypes.h"
 #include "GameFramework/Actor.h"
 #include "GameplayTagContainer.h"
 #include "Weapon.generated.h"
@@ -70,10 +71,22 @@ public:
 	/**  */
 	UMaterialInstanceDynamic* GetMagazineDynamicMaterialInstance();
 	
+	FFPSCrosshairParams GetCrosshairParams() const { return CrosshairParams; }
+	
 	void AttachToOwningPawn() const;
 	
 	void WeaponTrace(FHitResult& OutHitResult, float TraceLength) const;
 	
+	void Local_Fire(const FVector& ImpactPoint, const FVector& ImpactNormal, TEnumAsByte<EPhysicalSurface> ImpactSurfaceType, bool bIsFirstPerson);
+	
+	int32 Auth_Fire();
+	
+	void Rep_Fire(int32 AuthAmmo);
+	
+	UFUNCTION(BlueprintImplementableEvent)
+	void DryFireEffects();
+	
+public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPS|Weapon", Meta = (Categories = "Weapon.Type"))
 	FGameplayTag WeaponTypeTag;
 	
@@ -86,22 +99,12 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPS|Weapon|Debug")
 	bool bDebugWeapon;
 	
-	void Local_Fire(const FVector& ImpactPoint, const FVector& ImpactNormal, TEnumAsByte<EPhysicalSurface> ImpactSurfaceType, bool bIsFirstPerson);
-	
-	int32 Auth_Fire();
-	
-	void Rep_Fire(int32 AuthAmmo);
-	
-	UFUNCTION(BlueprintImplementableEvent)
-	void DryFireEffects();
-	
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPS|Weapon")
 	TEnumAsByte<EFPSFireType> FireMode;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPS|Weapon", meta=(EditConditionHides, EditCondition="FireMode==EFPSFireType::Burst"))
 	int32 BurstCount;
-	
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPS|Weapon", meta=(ClampMin = 150.0f, ClampMax = 900.0f, EditConditionHides, EditCondition="FireMode!=EFPSFireType::SemiAuto"))
 	float RoundsPerMinute;
@@ -123,6 +126,9 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly, Category="FPS|Weapon|UI")
 	TObjectPtr<UMaterialInterface> MagazineMaterial;
+	
+	UPROPERTY(EditDefaultsOnly, Category="FPS|Weapon|UI")
+	FFPSCrosshairParams CrosshairParams;
 	
 	/** */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
