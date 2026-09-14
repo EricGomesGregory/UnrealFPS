@@ -18,7 +18,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCombatToggleActionEvent, bool, bPre
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FCombatCrosshairChanged, UMaterialInstanceDynamic*, CrosshairDynMatInst, const FFPSCrosshairParams&, CrosshairParams, bool, bTargetingPlayer);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FCombatMagazineChanged, UMaterialInstanceDynamic*, CrosshairDynMatInst, int32, Current, int32, Size);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FCombatMagazineDelegate, int32, Current, int32, Size, int32, Reserve);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FCombatCurrenReserveChanged, int32, InReserves, int32, InWeapon);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FCombatCurrenReserveChanged, int32, InReserves, int32, InWeapon, UMaterialInterface*, WeaponIconMaterial);
 
 UCLASS()
 class FPS_API UCombatComponent : public UActorComponent

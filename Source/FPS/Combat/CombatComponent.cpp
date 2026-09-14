@@ -134,7 +134,7 @@ void UCombatComponent::Equip(AWeapon* Weapon)
 	CurrentWeapon->AttachToOwningPawn();
 	
 	CurrentReserves = Reserves.FindChecked(CurrentWeapon->WeaponTypeTag);
-	OnCurrentReserveChanged.Broadcast(CurrentReserves, Weapon->GetMagazine());
+	OnCurrentReserveChanged.Broadcast(CurrentReserves, Weapon->GetMagazine(), Weapon->GetWeaponIcon());
 }
 
 void UCombatComponent::Initiate_AimWeapon_Pressed()
@@ -216,7 +216,7 @@ void UCombatComponent::OnRep_CurrentReserves()
 {
 	if (IsValid(CurrentWeapon))
 	{
-		OnCurrentReserveChanged.Broadcast(CurrentReserves, CurrentWeapon->GetMagazine());
+		OnCurrentReserveChanged.Broadcast(CurrentReserves, CurrentWeapon->GetMagazine(), CurrentWeapon->GetWeaponIcon());
 	}
 }
 

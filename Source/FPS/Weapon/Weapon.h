@@ -73,6 +73,8 @@ public:
 	
 	FFPSCrosshairParams GetCrosshairParams() const { return CrosshairParams; }
 	
+	UMaterialInterface* GetWeaponIcon() const { return WeaponIcon; }
+	
 	void AttachToOwningPawn() const;
 	
 	void WeaponTrace(FHitResult& OutHitResult, float TraceLength) const;
@@ -129,6 +131,9 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly, Category="FPS|Weapon|UI")
 	FFPSCrosshairParams CrosshairParams;
+	
+	UPROPERTY(EditDefaultsOnly, Category="FPS|Weapon|UI")
+	TObjectPtr<UMaterialInterface> WeaponIcon;
 	
 	/** */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)

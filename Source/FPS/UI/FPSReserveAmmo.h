@@ -27,7 +27,7 @@ protected:
 	void OnPossessedPawnChanged(APawn* OldPawn, APawn* NewPawn);
 	
 	UFUNCTION()
-	void OnCurrentReserveChanged(int32 InReserves, int32 InWeapon);
+	void OnCurrentReserveChanged(int32 InReserves, int32 InWeapon, UMaterialInterface* WeaponIconMaterial);
 	
 	UFUNCTION()
 	void OnRoundFired(int32 Current, int32 Size, int32 Reserve);
@@ -52,6 +52,8 @@ protected:
 	TObjectPtr<UTextBlock> Text_Reserve;
 	
 private:
+	void SetWeaponIcon(UMaterialInterface* Material);
+	
 	void SetMagazineText(int32 Value);
 	
 	void SetMagazineSizeText(int32 Value);

@@ -30,7 +30,7 @@ void UFPSReserveAmmo::NativeOnInitialized()
 		{
 			if (auto* CurrentWeapon = IPlayerInterface::Execute_GetCurrentWeapon(FPSCharacter))
 			{
-				OnCurrentReserveChanged(IPlayerInterface::Execute_GetReserve(FPSCharacter), CurrentWeapon->GetMagazine());
+				OnCurrentReserveChanged(IPlayerInterface::Execute_GetReserve(FPSCharacter), CurrentWeapon->GetMagazine(), CurrentWeapon->GetWeaponIcon());
 			}
 		}
 		else
@@ -73,8 +73,10 @@ void UFPSReserveAmmo::OnPossessedPawnChanged(APawn* OldPawn, APawn* NewPawn)
 	}
 }
 
-void UFPSReserveAmmo::OnCurrentReserveChanged(int32 InReserves, int32 InWeapon)
+void UFPSReserveAmmo::OnCurrentReserveChanged(int32 InReserves, int32 InWeapon, UMaterialInterface* WeaponIconMaterial)
 {
+	SetWeaponIcon(WeaponIconMaterial);
+	
 	SetMagazineText(InWeapon);
 	SetMagazineSizeText(InWeapon);
 
@@ -100,7 +102,16 @@ void UFPSReserveAmmo::OnWeaponFirstReplicated(AWeapon* Weapon)
 	auto* FPSCharacter = Cast<AFPSCharacter>(GetOwningPlayer()->GetPawn());
 	check(FPSCharacter);
 	
-	OnCurrentReserveChanged(IPlayerInterface::Execute_GetReserve(FPSCharacter), Weapon->GetMagazine());
+	OnCurrentReserveChanged(IPlayerInterface::Execute_GetReserve(FPSCharacter), Weapon->GetMagazine(), Weapon->GetWeaponIcon());
+}
+
+void UFPSReserveAmmo::SetWeaponIcon(UMaterialInterface* Material)
+{
+	check(Material);
+	
+	FSlateBrush Brush;
+	Brush.SetResourceObject(Material);
+	Image_WeaponIcon->SetBrush(Brush);
 }
 
 void UFPSReserveAmmo::SetMagazineText(int32 Value)
