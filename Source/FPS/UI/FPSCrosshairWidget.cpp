@@ -174,7 +174,7 @@ void UFPSCrosshairWidget::OnTargetingPlayerChanged(bool bInTargetingPlayer)
 	}
 }
 
-void UFPSCrosshairWidget::OnRoundFired(int32 Current, int32 Size)
+void UFPSCrosshairWidget::OnRoundFired(int32 Current, int32 Size, int32 Reserve)
 {
 	RoundFired_CornerScaleFactor += CurrentCrosshairParams.ScaleFactor_RoundFired;
 	RoundFired_ShapeCutThicknessFactor += CurrentCrosshairParams.ShapeCutFactor_RoundFired;

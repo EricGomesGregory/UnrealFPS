@@ -34,6 +34,7 @@ void UCombatComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty
 	DOREPLIFETIME(ThisClass, CurrentWeapon);
 	
 	DOREPLIFETIME_CONDITION(ThisClass, bAiming, COND_SkipOwner);
+	DOREPLIFETIME_CONDITION(ThisClass, CurrentReserves, COND_OwnerOnly);
 }
 
 void UCombatComponent::InitializeWeaponWidgets()
@@ -105,6 +106,7 @@ void UCombatComponent::SpawnInventoryWeapons()
 			}
 		
 			InventoryWeapons.AddUnique(WeaponInstance);
+			Reserves.Add(WeaponInstance->WeaponTypeTag, WeaponInstance->GetReserves());
 		}
 	
 		if (InventoryWeapons.Num() > 0)
@@ -130,6 +132,9 @@ void UCombatComponent::Equip(AWeapon* Weapon)
 {
 	CurrentWeapon = Weapon;
 	CurrentWeapon->AttachToOwningPawn();
+	
+	CurrentReserves = Reserves.FindChecked(CurrentWeapon->WeaponTypeTag);
+	OnCurrentReserveChanged.Broadcast(CurrentReserves, Weapon->GetMagazine());
 }
 
 void UCombatComponent::Initiate_AimWeapon_Pressed()
@@ -207,6 +212,14 @@ void UCombatComponent::OnRep_CurrentWeapon(AWeapon* LastWeapon)
 	}
 }
 
+void UCombatComponent::OnRep_CurrentReserves()
+{
+	if (IsValid(CurrentWeapon))
+	{
+		OnCurrentReserveChanged.Broadcast(CurrentReserves, CurrentWeapon->GetMagazine());
+	}
+}
+
 void UCombatComponent::Server_AimWeapon_Implementation(bool bPressed)
 {
 	Local_AimWeapon(bPressed);
@@ -279,7 +292,7 @@ void UCombatComponent::Local_FireWeapon()
 			BurstCount++;
 		}
 		
-		OnRoundFired.Broadcast(CurrentWeapon->GetMagazine(), CurrentWeapon->GetMagazineSize());
+		OnRoundFired.Broadcast(CurrentWeapon->GetMagazine(), CurrentWeapon->GetMagazineSize(), CurrentReserves);
 		GetWorld()->GetTimerManager().SetTimer(FireTimer, this, &ThisClass::FireTimerFinished, CurrentWeapon->GetFireRate());
 		
 		Server_FireWeapon(HitResult);	

@@ -67,7 +67,7 @@ protected:
 	void OnTargetingPlayerChanged(bool bInTargetingPlayer);
 	
 	UFUNCTION()
-	void OnRoundFired(int32 Current, int32 Size);
+	void OnRoundFired(int32 Current, int32 Size, int32 Reserve);
 	
 private:
 	UPROPERTY()

@@ -29,7 +29,9 @@ public:
 	virtual USkeletalMeshComponent* GetFirstPersonSkeletalMeshComponent_Implementation() const override;
 	virtual USkeletalMeshComponent* GetThirdPersonSkeletalMeshComponent_Implementation() const override;
 	virtual void WeaponReplicated_Implementation() override;
-	AWeapon* GetCurrentWeapon_Implementation() const override;
+	virtual AWeapon* GetCurrentWeapon_Implementation() const override;
+	virtual int32 GetMagazineSize_Implementation() const override;
+	virtual int32 GetReserve_Implementation() const override;
 	//~End IPlayerInterface
 	
 	virtual void Tick(float DeltaTime) override;

@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/Actor.h"
+#include "GameplayTagContainer.h"
 #include "Components/ActorComponent.h"
 #include "CombatComponent.generated.h"
 
@@ -16,7 +17,8 @@ class UMaterialInstanceDynamic;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCombatToggleActionEvent, bool, bPressed);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FCombatCrosshairChanged, UMaterialInstanceDynamic*, CrosshairDynMatInst, const FFPSCrosshairParams&, CrosshairParams, bool, bTargetingPlayer);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FCombatMagazineChanged, UMaterialInstanceDynamic*, CrosshairDynMatInst, int32, Current, int32, Size);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FCombatMagazineDelegate, int32, Current, int32, Size);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FCombatMagazineDelegate, int32, Current, int32, Size, int32, Reserve);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FCombatCurrenReserveChanged, int32, InReserves, int32, InWeapon);
 
 UCLASS()
 class FPS_API UCombatComponent : public UActorComponent
@@ -72,6 +74,9 @@ public:
 	UPROPERTY(BlueprintReadOnly, Replicated, Category="FPS|Weapon")
 	bool bAiming;
 	
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_CurrentReserves, Category="FPS|Weapon")
+	int32 CurrentReserves;
+	
 	mutable FCombatToggleActionEvent OnAimWeapon;
 	
 	UPROPERTY(BlueprintAssignable)
@@ -85,6 +90,9 @@ public:
 	
 	UPROPERTY(BlueprintAssignable)
 	FCombatToggleActionEvent OnTargetingPlayer;
+	
+	UPROPERTY(BlueprintAssignable)
+	FCombatCurrenReserveChanged OnCurrentReserveChanged;
 	
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPS|Weapon")
@@ -102,6 +110,9 @@ protected:
 	UFUNCTION()
 	void OnRep_CurrentWeapon(AWeapon* LastWeapon);
 	
+	UFUNCTION()
+	void OnRep_CurrentReserves();
+	
 private:
 	UPROPERTY(Transient, BlueprintReadOnly, ReplicatedUsing=OnRep_CurrentWeapon, meta=(AllowPrivateAccess=true))
 	TObjectPtr<AWeapon> CurrentWeapon;
@@ -113,6 +124,8 @@ private:
 	
 	bool bHitPlayer;
 	bool bHitPlayerLastFrame;
+	
+	TMap<FGameplayTag, int32> Reserves;
 	
 	int32 BurstCount;
 	

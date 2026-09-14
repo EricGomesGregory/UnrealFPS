@@ -85,6 +85,16 @@ AWeapon* AFPSCharacter::GetCurrentWeapon_Implementation() const
 	return CombatComponent->GetCurrentWeapon();
 }
 
+int32 AFPSCharacter::GetMagazineSize_Implementation() const
+{
+	return CombatComponent->GetCurrentWeapon()->GetMagazine();
+}
+
+int32 AFPSCharacter::GetReserve_Implementation() const
+{
+	return CombatComponent->CurrentReserves;
+}
+
 void AFPSCharacter::BeginPlay()
 {
 	Super::BeginPlay();

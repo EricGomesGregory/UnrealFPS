@@ -38,4 +38,10 @@ public:
 	
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	AWeapon* GetCurrentWeapon() const;
+	
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	int32 GetMagazineSize() const;
+	
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	int32 GetReserve() const;
 };
