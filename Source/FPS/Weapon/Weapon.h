@@ -94,7 +94,7 @@ public:
 	
 	UMaterialInterface* GetWeaponIcon() const { return WeaponIcon; }
 	
-	void AttachToOwningPawn() const;
+	void AttachToOwningPawn(const APawn* OwningPawn) const;
 	
 	void WeaponTrace(FHitResult& OutHitResult, float TraceLength) const;
 	
@@ -167,8 +167,6 @@ protected:
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void FireEffects(const FVector& ImpactPoint, const FVector& ImpactNormal, EPhysicalSurface ImpactSurfaceType, bool bIsFirstPerson);
-	
-	virtual void OnRep_Instigator() override;
 	
 	void SetMeshVisibilities(const APawn* OwningPawn) const;
 	

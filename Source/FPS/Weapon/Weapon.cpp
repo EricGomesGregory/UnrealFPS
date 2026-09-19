@@ -106,10 +106,8 @@ UMaterialInstanceDynamic* AWeapon::GetMagazineDynamicMaterialInstance()
 	return DynMatInst_Magazine;
 }
 
-void AWeapon::AttachToOwningPawn() const
+void AWeapon::AttachToOwningPawn(const APawn* OwningPawn) const
 {
-	const auto* OwningPawn = GetInstigator();
-	
 	if (IsValid(OwningPawn) && OwningPawn->Implements<UPlayerInterface>())
 	{
 		SetMeshVisibilities(OwningPawn);
@@ -215,13 +213,6 @@ void AWeapon::BeginPlay()
 	
 	Magazine = MagazineSize;
 	Reserves = ReservesSize;
-}
-
-void AWeapon::OnRep_Instigator()
-{
-	Super::OnRep_Instigator();
-	
-	AttachToOwningPawn();
 }
 
 void AWeapon::SetMeshVisibilities(const APawn* OwningPawn) const

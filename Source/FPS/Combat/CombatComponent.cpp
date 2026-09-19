@@ -97,14 +97,16 @@ void UCombatComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, 
 
 void UCombatComponent::SpawnInventoryWeapons()
 {
-	if (GetOwner()->GetLocalRole() == ROLE_Authority)
+	const APawn* OwningPawn = CastChecked<APawn>(GetOwner());
+	
+	if (OwningPawn->GetLocalRole() == ROLE_Authority)
 	{
 		for (const TSubclassOf<AWeapon> WeaponClass : DefaultWeaponClasses)
 		{
 			AWeapon* WeaponInstance = SpawnWeapon(WeaponClass);
 			if (IsValid(WeaponInstance))
 			{
-				WeaponInstance->AttachToOwningPawn();
+				WeaponInstance->AttachToOwningPawn(OwningPawn);
 			}
 		
 			InventoryWeapons.AddUnique(WeaponInstance);
@@ -132,8 +134,10 @@ void UCombatComponent::DestroyInventoryWeapons()
 
 void UCombatComponent::Equip(AWeapon* Weapon)
 {
+	const APawn* OwningPawn = CastChecked<APawn>(GetOwner());
+	
 	CurrentWeapon = Weapon;
-	CurrentWeapon->AttachToOwningPawn();
+	CurrentWeapon->AttachToOwningPawn(OwningPawn);
 	
 	CurrentReserves = Reserves.FindChecked(CurrentWeapon->WeaponTypeTag);
 	OnCurrentReserveChanged.Broadcast(CurrentReserves, Weapon->GetMagazine(), Weapon->GetWeaponIcon());
@@ -211,10 +215,12 @@ AWeapon* UCombatComponent::SpawnWeapon(TSubclassOf<AWeapon> WeaponClass) const
 
 void UCombatComponent::OnRep_CurrentWeapon(AWeapon* LastWeapon)
 {
+	APawn* OwningPawn = CastChecked<APawn>(GetOwner());
+	
 	if (IsValid(CurrentWeapon))
 	{
-		CurrentWeapon->AttachToOwningPawn();
-		IPlayerInterface::Execute_WeaponReplicated(GetOwner());
+		CurrentWeapon->AttachToOwningPawn(OwningPawn);
+		IPlayerInterface::Execute_WeaponReplicated(OwningPawn);
 		InitializeWeaponWidgets();
 	}
 }
