@@ -96,6 +96,8 @@ public:
 	
 	void AttachToOwningPawn(const APawn* OwningPawn) const;
 	
+	void DetachFromOwningPawn();
+	
 	void WeaponTrace(FHitResult& OutHitResult, float TraceLength) const;
 	
 	void Local_Fire(const FVector& ImpactPoint, const FVector& ImpactNormal, TEnumAsByte<EPhysicalSurface> ImpactSurfaceType, bool bIsFirstPerson);

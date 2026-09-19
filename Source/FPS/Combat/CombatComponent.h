@@ -52,6 +52,11 @@ public:
 	
 	void Equip(AWeapon* Weapon);
 	
+	void Local_EquipWeapon(AWeapon* Weapon);
+	
+	UFUNCTION(Server, Reliable)
+	void Server_EquipWeapon(AWeapon* Weapon);
+	
 	/**  */
 	void Initiate_AimWeapon_Pressed();
 	
@@ -137,6 +142,8 @@ private:
 	FTimerHandle FireTimer;
 	
 private:
+	void SetCurrentWeapon(AWeapon* NewWeapon, AWeapon* OldWeapon);
+	
 	UFUNCTION(Server, Reliable)
 	void Server_AimWeapon(bool bPressed);
 	

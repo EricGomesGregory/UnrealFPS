@@ -121,6 +121,15 @@ void AWeapon::AttachToOwningPawn(const APawn* OwningPawn) const
 	}
 }
 
+void AWeapon::DetachFromOwningPawn()
+{
+	FirstPersonMesh->DetachFromComponent(FDetachmentTransformRules::KeepRelativeTransform);
+	FirstPersonMesh->SetHiddenInGame(true);
+	
+	ThirdPersonMesh->DetachFromComponent(FDetachmentTransformRules::KeepRelativeTransform);
+	ThirdPersonMesh->SetHiddenInGame(true);
+}
+
 void AWeapon::WeaponTrace(FHitResult& OutHitResult, float TraceLength) const
 {
 	ensure(GetInstigator());
