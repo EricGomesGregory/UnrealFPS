@@ -44,6 +44,14 @@ AWeapon::AWeapon()
 	ReservesSize = 20;
 	
 	Sequence = 0;
+	WeaponStatus = EFPSWeaponStatus::Unequipped;
+}
+
+void AWeapon::SetWeaponStatus(const EFPSWeaponStatus NewStatus)
+{
+	//@Eric TODO: Handle swap gating to prevent invalid state
+	UE_LOG(LogTemp, Display, TEXT("[%s] Current=%d Next=%d"), *GetName(), WeaponStatus, NewStatus);
+	WeaponStatus = NewStatus;
 }
 
 int32 AWeapon::GetMagazine() const

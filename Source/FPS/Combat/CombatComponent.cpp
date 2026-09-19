@@ -24,6 +24,8 @@ UCombatComponent::UCombatComponent()
 	TraceLength = 20000.0f;
 	bFiring = false;
 	BurstCount = 0;
+	
+	Local_WeaponIndex = 0;
 }
 
 void UCombatComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
@@ -158,7 +160,12 @@ void UCombatComponent::Initiate_AimWeapon_Released()
 
 void UCombatComponent::Initiate_CycleWeapon()
 {
-	UE_LOG(LogTemp, Display, TEXT("CycleWeapon"));
+	if (!IsValid(CurrentWeapon)) return;
+	
+	if (CurrentWeapon->GetWeaponStatus() == EFPSWeaponStatus::Cycling) return;
+
+	AdvanceWeaponIndex();
+	Local_CycleWeapon(Local_WeaponIndex);
 }
 
 void UCombatComponent::Initiate_FireWeapon_Pressed()
@@ -228,6 +235,56 @@ void UCombatComponent::Server_AimWeapon_Implementation(bool bPressed)
 void UCombatComponent::Local_AimWeapon(bool bPressed)
 {
 	bAiming = bPressed;
+}
+
+void UCombatComponent::Server_CycleWeapon_Implementation(const int32 WeaponIndex)
+{
+	Local_WeaponIndex = WeaponIndex;
+	Multicast_CycleWeapon_Implementation(WeaponIndex);
+}
+
+void UCombatComponent::Multicast_CycleWeapon_Implementation(const int32 WeaponIndex)
+{
+	APawn* OwningPawn = CastChecked<APawn>(GetOwner());
+	
+	if (!OwningPawn->IsLocallyControlled())
+	{
+		Local_WeaponIndex = WeaponIndex;
+		Local_CycleWeapon(WeaponIndex);
+	}
+}
+
+void UCombatComponent::Local_CycleWeapon(const int32 WeaponIndex)
+{
+	AWeapon* NextWeapon = InventoryWeapons[WeaponIndex];
+	if (!IsValid(NextWeapon) || !IsValid(WeaponsData)) return;
+	CurrentWeapon->SetWeaponStatus(EFPSWeaponStatus::Cycling);
+	NextWeapon->SetWeaponStatus(EFPSWeaponStatus::Cycling);
+	
+	APawn* OwningPawn = CastChecked<APawn>(GetOwner());
+	
+	if (OwningPawn->IsLocallyControlled())
+	{
+		const auto& Montages = WeaponsData->FirstPersonMontages.FindChecked(NextWeapon->WeaponTypeTag);
+		const auto* Mesh = IPlayerInterface::Execute_GetFirstPersonSkeletalMeshComponent(OwningPawn);
+	
+		if (IsValid(Mesh) && IsValid(Montages.EquipMontage))
+		{
+			Mesh->GetAnimInstance()->Montage_Play(Montages.EquipMontage);
+		}
+		
+		Server_CycleWeapon_Implementation(WeaponIndex);
+	}
+	else
+	{
+		const auto& Montages = WeaponsData->ThirdPersonMontages.FindChecked(NextWeapon->WeaponTypeTag);
+		const auto* Mesh = IPlayerInterface::Execute_GetThirdPersonSkeletalMeshComponent(OwningPawn);
+	
+		if (IsValid(Mesh) && IsValid(Montages.EquipMontage))
+		{
+			Mesh->GetAnimInstance()->Montage_Play(Montages.EquipMontage);
+		}
+	}
 }
 
 void UCombatComponent::Server_FireWeapon_Implementation(const FHitResult& HitResult)
@@ -323,4 +380,14 @@ void UCombatComponent::FireTimerFinished()
 		}
 	}
 	
+}
+
+int32 UCombatComponent::AdvanceWeaponIndex()
+{
+	if (InventoryWeapons.Num() >= 2)
+	{
+		Local_WeaponIndex = (Local_WeaponIndex + 1) % InventoryWeapons.Num();
+	}
+	
+	return Local_WeaponIndex;
 }

@@ -138,6 +138,14 @@ private:
 	void Local_AimWeapon(bool bPressed);
 	
 	UFUNCTION(Server, Reliable)
+	void Server_CycleWeapon(const int32 WeaponIndex);
+	
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_CycleWeapon(const int32 WeaponIndex);
+	
+	void Local_CycleWeapon(const int32 WeaponIndex);
+	
+	UFUNCTION(Server, Reliable)
 	void Server_FireWeapon(const FHitResult& HitResult);
 	
 	UFUNCTION(NetMulticast, Reliable)
@@ -146,4 +154,8 @@ private:
 	void Local_FireWeapon();
 	
 	void FireTimerFinished();
+	
+	int32 AdvanceWeaponIndex();
+	
+	int32 Local_WeaponIndex;
 };

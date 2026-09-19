@@ -12,6 +12,7 @@ class UMaterialInstanceDynamic;
 
 enum EPhysicalSurface : int;
 
+
 UENUM(BlueprintType)
 enum EFPSFireType : uint8
 {
@@ -19,6 +20,18 @@ enum EFPSFireType : uint8
 	Burst UMETA(DisplayName="Burst"),
 	Auto UMETA(DisplayName="Automatic"),
 };
+
+
+UENUM(BlueprintType)
+enum EFPSWeaponStatus : uint8
+{
+	Idle UMETA(DisplayName="Idle, can go to any state"),
+	Firing UMETA(DisplayName="Firing, can't Reload/Cycle"),
+	Reloading UMETA(DisplayName="Reloading, can't Reload/Cycle"),
+	Cycling UMETA(DisplayName="Cycling, can't Fire/Reload/Cycle"),
+	Unequipped UMETA(DisplayName="Unequipped, can only Cycle"),
+};
+
 
 UCLASS()
 class FPS_API AWeapon : public AActor
@@ -36,6 +49,12 @@ public:
 	
 	//UFUNCTION(BlueprintPure, Category="FPS|Weapon")
 	//FGameplayTag GetWeaponTypeTag() const { return WeaponTypeTag; }
+	
+	UFUNCTION(BlueprintPure, Category="FPS|Weapon")
+	EFPSWeaponStatus GetWeaponStatus() const { return WeaponStatus; }
+	
+	UFUNCTION(BlueprintCallable, Category="FPS|Weapon")
+	void SetWeaponStatus(const EFPSWeaponStatus NewStatus);
 	
 	UFUNCTION(BlueprintPure, Category="FPS|Weapon")
 	EFPSFireType GetFireMode() const { return FireMode; }
@@ -157,11 +176,14 @@ private:
 	/** Magazine client-side prediction counter */
 	int32 Sequence;
 	
-	/** */
+	/**  */
+	EFPSWeaponStatus WeaponStatus;
+	
+	/**  */
 	UPROPERTY()
 	TObjectPtr<UMaterialInstanceDynamic> DynMatInst_Crosshair;
 	
-	/** */
+	/**  */
 	UPROPERTY()
 	TObjectPtr<UMaterialInstanceDynamic> DynMatInst_Magazine;
 };
