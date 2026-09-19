@@ -137,6 +137,7 @@ void UCombatComponent::Equip(AWeapon* Weapon)
 	const APawn* OwningPawn = CastChecked<APawn>(GetOwner());
 	
 	CurrentWeapon = Weapon;
+	CurrentWeapon->SetWeaponStatus(EFPSWeaponStatus::Idle);
 	CurrentWeapon->AttachToOwningPawn(OwningPawn);
 	
 	CurrentReserves = Reserves.FindChecked(CurrentWeapon->WeaponTypeTag);
@@ -166,13 +167,22 @@ void UCombatComponent::Server_EquipWeapon_Implementation(AWeapon* Weapon)
 
 void UCombatComponent::Initiate_AimWeapon_Pressed()
 {
-	Local_AimWeapon(true);
-	Server_AimWeapon(true);
+	const bool bIsWeaponCycling = CurrentWeapon->GetWeaponStatus() != EFPSWeaponStatus::Cycling;
+	const bool bIsWeaponUnequipped = CurrentWeapon->GetWeaponStatus() != EFPSWeaponStatus::Unequipped;
+	if (bIsWeaponCycling || bIsWeaponUnequipped)
+	{
+		Local_AimWeapon(true);
+		Server_AimWeapon(true);
 	
-	auto* Owner = GetOwner();
-	check(Owner);
+		auto* Owner = GetOwner();
+		check(Owner);
 	
-	OnAimWeapon.Broadcast(true);
+		OnAimWeapon.Broadcast(true);
+	}
+	else
+	{
+		Initiate_AimWeapon_Released();
+	}
 }
 
 void UCombatComponent::Initiate_AimWeapon_Released()
@@ -197,14 +207,17 @@ void UCombatComponent::Initiate_FireWeapon_Pressed()
 {
 	if (CurrentWeapon)
 	{
-		if (CurrentWeapon->GetMagazine() > 0)
+		if (CurrentWeapon->GetWeaponStatus() == EFPSWeaponStatus::Idle)
 		{
-			bFiring = true;
-			Local_FireWeapon();		
-		}
-		else
-		{
-			CurrentWeapon->DryFireEffects();
+			if (CurrentWeapon->GetMagazine() > 0)
+			{
+				bFiring = true;
+				Local_FireWeapon();
+			}
+			else
+			{
+				CurrentWeapon->DryFireEffects();
+			}	
 		}
 	}
 }
@@ -301,6 +314,7 @@ void UCombatComponent::SetCurrentWeapon(AWeapon* NewWeapon, AWeapon* OldWeapon)
 	}
 	
 	CurrentWeapon = NewWeapon;
+	CurrentWeapon->SetWeaponStatus(EFPSWeaponStatus::Idle);
 	CurrentWeapon->AttachToOwningPawn(OwningPawn);
 	
 	if (OwningPawn->HasAuthority() && IsValid(CurrentWeapon))
