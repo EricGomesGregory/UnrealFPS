@@ -198,6 +198,11 @@ void UCombatComponent::Initiate_ReloadWeapon()
 	UE_LOG(LogTemp, Display, TEXT("ReloadWeapon"));
 }
 
+void UCombatComponent::Notify_CycleWeapon()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.0, FColor::Cyan, TEXT("Notify CycleWeapon"), false);
+}
+
 AWeapon* UCombatComponent::SpawnWeapon(TSubclassOf<AWeapon> WeaponClass) const
 {
 	auto* OwingPawn = Cast<APawn>(GetOwner());
@@ -231,6 +236,20 @@ void UCombatComponent::OnRep_CurrentReserves()
 	{
 		OnCurrentReserveChanged.Broadcast(CurrentReserves, CurrentWeapon->GetMagazine(), CurrentWeapon->GetWeaponIcon());
 	}
+}
+
+void UCombatComponent::BlendOut_CycleWeapon(UAnimMontage* Montage, bool bInterrupted)
+{
+	const APawn* OwningPawn = CastChecked<APawn>(GetOwner());
+	UAnimInstance* AnimInstance = IPlayerInterface::Execute_GetFirstPersonSkeletalMeshComponent(OwningPawn)->GetAnimInstance();
+	if (IsValid(AnimInstance) && AnimInstance->OnMontageBlendingOut.IsAlreadyBound(this, &ThisClass::BlendOut_CycleWeapon))
+	{
+		AnimInstance->OnMontageBlendingOut.RemoveDynamic(this, &ThisClass::BlendOut_CycleWeapon);
+	}
+	
+	CurrentWeapon->SetWeaponStatus(EFPSWeaponStatus::Idle);
+	
+	GEngine->AddOnScreenDebugMessage(-1, 5.0, FColor::Yellow, TEXT("BlendOut CycleWeapon"), false);
 }
 
 void UCombatComponent::Server_AimWeapon_Implementation(bool bPressed)
@@ -274,9 +293,14 @@ void UCombatComponent::Local_CycleWeapon(const int32 WeaponIndex)
 		const auto& Montages = WeaponsData->FirstPersonMontages.FindChecked(NextWeapon->WeaponTypeTag);
 		const auto* Mesh = IPlayerInterface::Execute_GetFirstPersonSkeletalMeshComponent(OwningPawn);
 	
-		if (IsValid(Mesh) && IsValid(Montages.EquipMontage))
+		if (IsValid(Mesh))
 		{
-			Mesh->GetAnimInstance()->Montage_Play(Montages.EquipMontage);
+			if (IsValid(Montages.EquipMontage))
+			{
+				Mesh->GetAnimInstance()->Montage_Play(Montages.EquipMontage);
+			}
+			
+			Mesh->GetAnimInstance()->OnMontageBlendingOut.AddDynamic(this, &ThisClass::BlendOut_CycleWeapon);
 		}
 		
 		Server_CycleWeapon_Implementation(WeaponIndex);

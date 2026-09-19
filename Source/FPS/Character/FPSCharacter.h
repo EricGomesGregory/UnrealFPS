@@ -32,6 +32,7 @@ public:
 	virtual AWeapon* GetCurrentWeapon_Implementation() const override;
 	virtual int32 GetMagazineSize_Implementation() const override;
 	virtual int32 GetReserve_Implementation() const override;
+	virtual void Notify_CycleWeapon_Implementation() override;
 	//~End IPlayerInterface
 	
 	virtual void Tick(float DeltaTime) override;

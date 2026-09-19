@@ -95,6 +95,11 @@ int32 AFPSCharacter::GetReserve_Implementation() const
 	return CombatComponent->CurrentReserves;
 }
 
+void AFPSCharacter::Notify_CycleWeapon_Implementation()
+{
+	CombatComponent->Notify_CycleWeapon();
+}
+
 void AFPSCharacter::BeginPlay()
 {
 	Super::BeginPlay();

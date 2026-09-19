@@ -70,6 +70,8 @@ public:
 	/**  */
 	void Initiate_ReloadWeapon();
 	
+	void Notify_CycleWeapon();
+	
 public:
 	UPROPERTY(BlueprintReadOnly, Replicated, Category="FPS|Weapon")
 	bool bAiming;
@@ -112,6 +114,9 @@ protected:
 	
 	UFUNCTION()
 	void OnRep_CurrentReserves();
+	
+	UFUNCTION()
+	void BlendOut_CycleWeapon(UAnimMontage* Montage, bool bInterrupted);
 	
 private:
 	UPROPERTY(Transient, BlueprintReadOnly, ReplicatedUsing=OnRep_CurrentWeapon, meta=(AllowPrivateAccess=true))
