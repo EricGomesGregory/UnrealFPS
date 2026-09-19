@@ -106,7 +106,7 @@ void UCombatComponent::SpawnInventoryWeapons()
 			}
 		
 			InventoryWeapons.AddUnique(WeaponInstance);
-			Reserves.Add(WeaponInstance->WeaponTypeTag, WeaponInstance->GetReserves());
+			Reserves.Add(WeaponInstance->WeaponTypeTag, WeaponInstance->GetReservesSize());
 		}
 	
 		if (InventoryWeapons.Num() > 0)
@@ -292,7 +292,9 @@ void UCombatComponent::Local_FireWeapon()
 			BurstCount++;
 		}
 		
-		OnRoundFired.Broadcast(CurrentWeapon->GetMagazine(), CurrentWeapon->GetMagazineSize(), CurrentReserves);
+		const int32 Magazine = CurrentWeapon->GetMagazine();
+		const int32 MagazineSize = CurrentWeapon->GetMagazineSize();
+		OnRoundFired.Broadcast(Magazine, MagazineSize, CurrentReserves);
 		GetWorld()->GetTimerManager().SetTimer(FireTimer, this, &ThisClass::FireTimerFinished, CurrentWeapon->GetFireRate());
 		
 		Server_FireWeapon(HitResult);	

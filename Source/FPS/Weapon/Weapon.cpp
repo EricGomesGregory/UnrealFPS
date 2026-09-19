@@ -48,7 +48,7 @@ AWeapon::AWeapon()
 
 int32 AWeapon::GetMagazine() const
 {
-	if (bMagazineInitialized)
+	if (GetInstigator())
 	{
 		return Magazine;
 	}
@@ -58,7 +58,7 @@ int32 AWeapon::GetMagazine() const
 
 int32 AWeapon::GetReserves() const
 {
-	if (bReservesInitialized)
+	if (GetInstigator())
 	{
 		return Reserves;
 	}
@@ -213,8 +213,6 @@ void AWeapon::OnRep_Instigator()
 {
 	Super::OnRep_Instigator();
 	
-	bMagazineInitialized = true;
-	bReservesInitialized = true;
 	AttachToOwningPawn();
 }
 

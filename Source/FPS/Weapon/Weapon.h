@@ -157,10 +157,6 @@ private:
 	/** Magazine client-side prediction counter */
 	int32 Sequence;
 	
-	bool bMagazineInitialized;
-	
-	bool bReservesInitialized;
-	
 	/** */
 	UPROPERTY()
 	TObjectPtr<UMaterialInstanceDynamic> DynMatInst_Crosshair;
