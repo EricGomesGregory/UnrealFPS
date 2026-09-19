@@ -40,11 +40,11 @@ void UFPSReserveAmmo::NativeOnInitialized()
 		
 		if (FPSCharacter->HasAuthority())
 		{
-			auto* Weapon = IPlayerInterface::Execute_GetCurrentWeapon(FPSCharacter);
-			auto Reserve = IPlayerInterface::Execute_GetReserve(FPSCharacter);
+			const auto* Weapon = IPlayerInterface::Execute_GetCurrentWeapon(FPSCharacter);
+			const auto Reserve = IPlayerInterface::Execute_GetReserve(FPSCharacter);
 			
 			//@Eric TODO: Fix this isn't working in Standalone 
-			SetMagazineText(Weapon->GetMagazine());
+			SetMagazineText(Weapon->GetMagazineSize());
 			SetMagazineSizeText(Weapon->GetMagazineSize());
 			SetReserveText(Reserve);
 		}
@@ -94,7 +94,7 @@ void UFPSReserveAmmo::OnRoundFired(int32 Current, int32 Size, int32 Reserve)
 void UFPSReserveAmmo::OnMagazineChanged(UMaterialInstanceDynamic* CrosshairDynMatInst, int32 Current, int32 Size)
 {
 	SetMagazineText(Current);
-	SetMagazineText(Size);
+	SetMagazineSizeText(Size);
 }
 
 void UFPSReserveAmmo::OnWeaponFirstReplicated(AWeapon* Weapon)
@@ -114,7 +114,7 @@ void UFPSReserveAmmo::SetWeaponIcon(UMaterialInterface* Material)
 	Image_WeaponIcon->SetBrush(Brush);
 }
 
-void UFPSReserveAmmo::SetMagazineText(int32 Value)
+void UFPSReserveAmmo::SetMagazineText(const int32 Value) const
 {
 	FText MagazineText;
 	if (Value > 9)
@@ -129,7 +129,7 @@ void UFPSReserveAmmo::SetMagazineText(int32 Value)
 	Text_Magazine->SetText(MagazineText);
 }
 
-void UFPSReserveAmmo::SetMagazineSizeText(int32 Value)
+void UFPSReserveAmmo::SetMagazineSizeText(const int32 Value) const
 {
 	FText MagazineSizeText;
 	if (Value > 9)
@@ -144,7 +144,7 @@ void UFPSReserveAmmo::SetMagazineSizeText(int32 Value)
 	Text_MagazineSize->SetText(MagazineSizeText);
 }
 
-void UFPSReserveAmmo::SetReserveText(int32 Value)
+void UFPSReserveAmmo::SetReserveText(const int32 Value) const
 {
 	const FText ReserveText = FText::Format(NSLOCTEXT("MagazineText", "ReserveKey", "{0}"), Value);
 	Text_Reserve->SetText(ReserveText);

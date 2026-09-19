@@ -54,9 +54,9 @@ protected:
 private:
 	void SetWeaponIcon(UMaterialInterface* Material);
 	
-	void SetMagazineText(int32 Value);
+	void SetMagazineText(int32 Value) const;
 	
-	void SetMagazineSizeText(int32 Value);
+	void SetMagazineSizeText(int32 Value) const;
 	
-	void SetReserveText(int32 Value);
+	void SetReserveText(int32 Value) const;
 };

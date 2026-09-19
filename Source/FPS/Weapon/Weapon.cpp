@@ -46,6 +46,26 @@ AWeapon::AWeapon()
 	Sequence = 0;
 }
 
+int32 AWeapon::GetMagazine() const
+{
+	if (bMagazineInitialized)
+	{
+		return Magazine;
+	}
+	
+	return GetMagazineSize();
+}
+
+int32 AWeapon::GetReserves() const
+{
+	if (bReservesInitialized)
+	{
+		return Reserves;
+	}
+	
+	return GetReservesSize();
+}
+
 void AWeapon::SetFirstPersonMeshHiddenInGame(bool NewHidden)
 {
 	FirstPersonMesh->SetHiddenInGame(NewHidden);
@@ -193,6 +213,8 @@ void AWeapon::OnRep_Instigator()
 {
 	Super::OnRep_Instigator();
 	
+	bMagazineInitialized = true;
+	bReservesInitialized = true;
 	AttachToOwningPawn();
 }
 

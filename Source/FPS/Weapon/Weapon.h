@@ -51,13 +51,13 @@ public:
 	int32 GetMagazineSize() const { return MagazineSize; }
 	
 	UFUNCTION(BlueprintPure, Category="FPS|Weapon")
-	int32 GetMagazine() const { return Magazine; }
+	int32 GetMagazine() const;
 	
 	UFUNCTION(BlueprintPure, Category="FPS|Weapon")
 	int32 GetReservesSize() const { return ReservesSize; }
 	
 	UFUNCTION(BlueprintPure, Category="FPS|Weapon")
-	int32 GetReserves() const { return Reserves; }
+	int32 GetReserves() const;
 	
 	UFUNCTION(BlueprintCallable, Category="FPS|Weapon")
 	void SetFirstPersonMeshHiddenInGame(bool NewHidden);
@@ -156,6 +156,10 @@ protected:
 private:
 	/** Magazine client-side prediction counter */
 	int32 Sequence;
+	
+	bool bMagazineInitialized;
+	
+	bool bReservesInitialized;
 	
 	/** */
 	UPROPERTY()
