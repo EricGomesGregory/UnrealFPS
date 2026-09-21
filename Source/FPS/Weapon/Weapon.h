@@ -186,4 +186,7 @@ private:
 	/**  */
 	UPROPERTY()
 	TObjectPtr<UMaterialInstanceDynamic> DynMatInst_Magazine;
+	
+private:
+	static FString GetWeaponStatusName(const EFPSWeaponStatus Status);
 };

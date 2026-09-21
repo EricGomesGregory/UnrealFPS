@@ -49,9 +49,57 @@ AWeapon::AWeapon()
 
 void AWeapon::SetWeaponStatus(const EFPSWeaponStatus NewStatus)
 {
-	//@Eric TODO: Handle swap gating to prevent invalid state
+	switch (NewStatus)
+	{
+	case Idle:
+		WeaponStatus = NewStatus;
+		break;
+	case Firing:
+		if (WeaponStatus == EFPSWeaponStatus::Idle)
+		{
+			WeaponStatus = NewStatus;
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Failed to set new state from=%s to=%s"), *GetWeaponStatusName(WeaponStatus), *GetWeaponStatusName(NewStatus));
+		}
+		break;
+	case Reloading:
+		if (WeaponStatus == EFPSWeaponStatus::Idle)
+		{
+			WeaponStatus = NewStatus;
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Failed to set new state from=%s to=%s"), *GetWeaponStatusName(WeaponStatus), *GetWeaponStatusName(NewStatus));
+		}
+		break;
+	case Cycling:
+		if (WeaponStatus == EFPSWeaponStatus::Idle)
+		{
+			WeaponStatus = NewStatus;
+		}
+		else if (WeaponStatus == EFPSWeaponStatus::Cycling)
+		{
+			WeaponStatus = NewStatus;
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Failed to set new state from=%s to=%s"), *GetWeaponStatusName(WeaponStatus), *GetWeaponStatusName(NewStatus));
+		}
+		break;
+	case Unequipped:
+		if (WeaponStatus == EFPSWeaponStatus::Cycling)
+		{
+			WeaponStatus = NewStatus;
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Failed to set new state from=%s to=%s"), *GetWeaponStatusName(WeaponStatus), *GetWeaponStatusName(NewStatus));
+		}
+		break;
+	}
 	UE_LOG(LogTemp, Display, TEXT("[%s] Current=%d Next=%d"), *GetName(), WeaponStatus, NewStatus);
-	WeaponStatus = NewStatus;
 }
 
 int32 AWeapon::GetMagazine() const
@@ -234,5 +282,24 @@ void AWeapon::SetMeshVisibilities(const APawn* OwningPawn) const
 	FirstPersonMesh->SetHiddenInGame(bVisibleInFirstPerson);
 	ThirdPersonMesh->SetHiddenInGame(bVisibleInThirdPerson);
 }
+
+FString AWeapon::GetWeaponStatusName(const EFPSWeaponStatus Status)
+{
+	switch (Status) {
+	case Idle:
+		return "Idle";
+	case Firing:
+		return "Firing";
+	case Reloading:
+		return "Reloading";
+	case Cycling:
+		return "Cycling";
+	case Unequipped:
+		return "Unequipped";
+	}
+	return "NULL";
+}
+
+
 
 

@@ -385,6 +385,9 @@ void UCombatComponent::Local_CycleWeapon(const int32 WeaponIndex)
 
 void UCombatComponent::Server_FireWeapon_Implementation(const FHitResult& HitResult)
 {
+	if (!IsValid(CurrentWeapon)) return;
+	if (CurrentWeapon->GetMagazine() <= 0) return;
+	
 	const bool bIsLocalHost = GetNetMode() != NM_ListenServer;
 	if (bIsLocalHost || !GetOwningPawn()->IsLocallyControlled())
 	{
@@ -424,6 +427,8 @@ void UCombatComponent::Local_FireWeapon()
 	
 	if (IsValid(CurrentWeapon))
 	{
+		CurrentWeapon->SetWeaponStatus(EFPSWeaponStatus::Firing);
+		
 		if (const auto* FirstPersonMesh = IPlayerInterface::Execute_GetFirstPersonSkeletalMeshComponent(GetOwner()))
 		{
 			const auto& FirsPersonMontages = WeaponsData->FirstPersonMontages.FindChecked(CurrentWeapon->WeaponTypeTag);
@@ -456,6 +461,8 @@ void UCombatComponent::Local_FireWeapon()
 
 void UCombatComponent::FireTimerFinished()
 {
+	CurrentWeapon->SetWeaponStatus(EFPSWeaponStatus::Idle);
+	
 	if (CurrentWeapon->GetFireMode() == EFPSFireType::Auto)
 	{
 		if (bFiring && CurrentWeapon->GetMagazine() > 0)
