@@ -100,6 +100,19 @@ void AFPSCharacter::Notify_CycleWeapon_Implementation()
 	CombatComponent->Notify_CycleWeapon();
 }
 
+void AFPSCharacter::Notify_ReloadWeapon_Implementation()
+{
+	CombatComponent->Notify_ReloadWeapon();
+}
+
+void AFPSCharacter::AddAmmoReserves_Implementation(const FGameplayTag& WeaponTypeTag, int32 Amount)
+{
+	if (HasAuthority() && IsValid(CombatComponent))
+	{
+		CombatComponent->AddAmmoReserves(WeaponTypeTag, Amount);
+	}
+}
+
 void AFPSCharacter::BeginPlay()
 {
 	Super::BeginPlay();

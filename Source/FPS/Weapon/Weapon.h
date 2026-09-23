@@ -72,11 +72,15 @@ public:
 	UFUNCTION(BlueprintPure, Category="FPS|Weapon")
 	int32 GetMagazine() const;
 	
+	void SetMagazine(const int32 NewMagazine);
+	
 	UFUNCTION(BlueprintPure, Category="FPS|Weapon")
 	int32 GetReservesSize() const { return ReservesSize; }
 	
 	UFUNCTION(BlueprintPure, Category="FPS|Weapon")
 	int32 GetReserves() const;
+	
+	void SetReserves(const int32 NewReserves);
 	
 	UFUNCTION(BlueprintCallable, Category="FPS|Weapon")
 	void SetFirstPersonMeshHiddenInGame(bool NewHidden);

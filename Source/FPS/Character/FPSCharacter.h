@@ -33,6 +33,8 @@ public:
 	virtual int32 GetMagazineSize_Implementation() const override;
 	virtual int32 GetReserve_Implementation() const override;
 	virtual void Notify_CycleWeapon_Implementation() override;
+	virtual void Notify_ReloadWeapon_Implementation() override;
+	virtual void AddAmmoReserves_Implementation(const FGameplayTag& WeaponTypeTag, int32 Amount) override;
 	//~End IPlayerInterface
 	
 	virtual void Tick(float DeltaTime) override;

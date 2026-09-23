@@ -52,11 +52,6 @@ public:
 	
 	void Equip(AWeapon* Weapon);
 	
-	void Local_EquipWeapon(AWeapon* Weapon);
-	
-	UFUNCTION(Server, Reliable)
-	void Server_EquipWeapon(AWeapon* Weapon);
-	
 	/**  */
 	void Initiate_AimWeapon_Pressed();
 	
@@ -65,6 +60,8 @@ public:
 	
 	/** Begin cycle to next weapon in inventory */
 	void Initiate_CycleWeapon();
+	
+	void Notify_CycleWeapon();
 	
 	/**  */
 	void Initiate_FireWeapon_Pressed();
@@ -75,7 +72,9 @@ public:
 	/**  */
 	void Initiate_ReloadWeapon();
 	
-	void Notify_CycleWeapon();
+	void Notify_ReloadWeapon();
+	
+	void AddAmmoReserves(const FGameplayTag& WeaponTypeTag, int32 Amount);
 	
 public:
 	UPROPERTY(BlueprintReadOnly, Replicated, Category="FPS|Weapon")
@@ -144,6 +143,12 @@ private:
 private:
 	void SetCurrentWeapon(AWeapon* NewWeapon, AWeapon* OldWeapon);
 	
+	void Local_EquipWeapon(AWeapon* Weapon);
+	
+	UFUNCTION(Server, Reliable)
+	void Server_EquipWeapon(AWeapon* Weapon);
+	
+	
 	UFUNCTION(Server, Reliable)
 	void Server_AimWeapon(bool bPressed);
 	
@@ -156,6 +161,17 @@ private:
 	void Multicast_CycleWeapon(const int32 WeaponIndex);
 	
 	void Local_CycleWeapon(const int32 WeaponIndex);
+	
+	void Local_ReloadWeapon();
+	
+	UFUNCTION(Server, Reliable)
+	void Server_ReloadWeapon();
+	
+	UFUNCTION(Client, Reliable)
+	void Client_ReloadWeapon(int32 NewMagazine, int32 NewReserve);
+	
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_ReloadWeapon();
 	
 	UFUNCTION(Server, Reliable)
 	void Server_FireWeapon(const FHitResult& HitResult);

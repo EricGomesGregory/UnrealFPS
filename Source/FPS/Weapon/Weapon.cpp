@@ -112,6 +112,11 @@ int32 AWeapon::GetMagazine() const
 	return GetMagazineSize();
 }
 
+void AWeapon::SetMagazine(const int32 NewMagazine)
+{
+	Magazine = NewMagazine;
+}
+
 int32 AWeapon::GetReserves() const
 {
 	if (GetInstigator())
@@ -120,6 +125,11 @@ int32 AWeapon::GetReserves() const
 	}
 	
 	return GetReservesSize();
+}
+
+void AWeapon::SetReserves(const int32 NewReserves)
+{
+	Reserves = NewReserves;
 }
 
 void AWeapon::SetFirstPersonMeshHiddenInGame(bool NewHidden)
@@ -244,7 +254,10 @@ void AWeapon::Local_Fire(const FVector& ImpactPoint, const FVector& ImpactNormal
 	if (GetInstigator()->IsLocallyControlled())
 	{
 		Magazine = FMath::Clamp(Magazine - 1, 0, MagazineSize);
-		++Sequence;
+		if (!GetInstigator()->HasAuthority())
+		{
+			++Sequence;
+		}
 	}
 }
 
@@ -254,9 +267,9 @@ int32 AWeapon::Auth_Fire()
 	return Magazine;
 }
 
-void AWeapon::Rep_Fire(int32 AuthAmmo)
+void AWeapon::Rep_Fire(const int32 AuthAmmo)
 {
-	if (GetInstigator()->IsLocallyControlled())
+	if (GetInstigator()->IsLocallyControlled() && !GetInstigator()->HasAuthority())
 	{
 		Magazine = AuthAmmo;
 		--Sequence;
