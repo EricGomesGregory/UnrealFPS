@@ -72,3 +72,6 @@ Plugins/**/Intermediate/*
 
 # Cache files for the editor to use
 DerivedDataCache/*
+
+# Remove 142 MB file
+Content\Effects\Textures\Flipbooks\SmokeSwirl_3_Flipbook_CHANNELPACK.uasset
