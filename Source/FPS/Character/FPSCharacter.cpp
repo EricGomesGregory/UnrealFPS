@@ -113,6 +113,14 @@ void AFPSCharacter::AddAmmoReserves_Implementation(const FGameplayTag& WeaponTyp
 	}
 }
 
+bool AFPSCharacter::DoDamage_Implementation(float DamageAmount, AActor* DamageInstigator)
+{
+	const int32 HitMontageIndex = FMath::RandRange(0, HitReactMontages.Num() - 1);
+	Multicast_HitReact(HitMontageIndex);
+	
+	return false; //@Eric TODO: Return if damage was lethal 
+}
+
 void AFPSCharacter::BeginPlay()
 {
 	Super::BeginPlay();
@@ -140,6 +148,29 @@ void AFPSCharacter::OnRep_PlayerState()
 	if (CombatComponent)
 	{
 		CombatComponent->InitializeWeaponWidgets();	
+	}
+}
+
+void AFPSCharacter::Multicast_HitReact_Implementation(int32 MontageIndex)
+{
+	if (GetNetMode() != NM_DedicatedServer && !IsLocallyControlled())
+	{
+		if (HitReactMontages.IsValidIndex(MontageIndex))
+		{
+			UAnimMontage* Montage = HitReactMontages[MontageIndex];
+			
+			for (const FSlotAnimationTrack& SlotAnimationTrack : Montage->SlotAnimTracks)
+			{
+				if (!GetMesh()->GetAnimInstance()->IsSlotActive(SlotAnimationTrack.SlotName))
+				{
+					GetMesh()->GetAnimInstance()->Montage_Play(Montage);
+				}
+			}
+		}
+		else
+		{
+			//@Eric TODO: Log error 
+		}
 	}
 }
 

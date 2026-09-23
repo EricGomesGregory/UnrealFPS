@@ -272,7 +272,7 @@ void UCombatComponent::Notify_ReloadWeapon()
 		CurrentWeapon->SetMagazine(NewMagazine);
 		
 		Reserves[CurrentWeapon->WeaponTypeTag] = Reserves[CurrentWeapon->WeaponTypeTag] - AmountToRefill;
-		CurrentReserves = Reserves[CurrentWeapon->WeaponTypeTag] - AmountToRefill;
+		CurrentReserves = Reserves[CurrentWeapon->WeaponTypeTag];
 		
 		Client_ReloadWeapon(CurrentWeapon->GetMagazine(), CurrentReserves);
 	}
@@ -500,6 +500,15 @@ void UCombatComponent::Server_FireWeapon_Implementation(const FHitResult& HitRes
 	if (!IsValid(CurrentWeapon)) return;
 	if (CurrentWeapon->GetMagazine() <= 0) return;
 	
+	if (IsValid(HitResult.GetActor()))
+	{
+		if (HitResult.GetActor()->Implements<UPlayerInterface>())
+		{
+			const float Damage = 0.f; //@Eric TODO: Implement damage calculation
+			IPlayerInterface::Execute_DoDamage(HitResult.GetActor(), Damage, GetOwningPawn());
+		}
+	}
+	
 	const bool bIsLocalHost = GetNetMode() != NM_ListenServer;
 	if (bIsLocalHost || !GetOwningPawn()->IsLocallyControlled())
 	{
@@ -576,14 +585,11 @@ void UCombatComponent::FireTimerFinished()
 	const auto* OwningPawn = CastChecked<APawn>(GetOwner());
 	if (!IsValid(CurrentWeapon)) return;
 	
-	if (OwningPawn->IsLocallyControlled())
+	if (CurrentWeapon->GetMagazine() == 0 && CurrentReserves > 0 && OwningPawn->IsLocallyControlled())
 	{
-		if (CurrentWeapon->GetMagazine() == 0 && CurrentReserves > 0)
-		{
-			Local_ReloadWeapon();
-			Server_ReloadWeapon();
-			return;
-		}	
+		Local_ReloadWeapon();
+		Server_ReloadWeapon();
+		return;
 	}
 	
 	CurrentWeapon->SetWeaponStatus(EFPSWeaponStatus::Idle);

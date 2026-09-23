@@ -53,4 +53,7 @@ public:
 	
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void AddAmmoReserves(const FGameplayTag& WeaponTypeTag, int32 Amount);
+	
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	bool DoDamage(float DamageAmount, AActor* DamageInstigator);
 };

@@ -35,6 +35,7 @@ public:
 	virtual void Notify_CycleWeapon_Implementation() override;
 	virtual void Notify_ReloadWeapon_Implementation() override;
 	virtual void AddAmmoReserves_Implementation(const FGameplayTag& WeaponTypeTag, int32 Amount) override;
+	virtual bool DoDamage_Implementation(float DamageAmount, AActor* DamageInstigator) override;
 	//~End IPlayerInterface
 	
 	virtual void Tick(float DeltaTime) override;
@@ -91,12 +92,18 @@ protected:
 	UPROPERTY(EditAnywhere, Category="FPS|Character|Animation")
 	float TurnInPlaceMinYaw = 5.0f;
 	
+	UPROPERTY(EditDefaultsOnly, Category="FPS|Character|Animation")
+	TArray<TObjectPtr<UAnimMontage>> HitReactMontages;
+	
 protected:
 	virtual void BeginPlay() override;
 	
 	virtual void BeginDestroy() override;
 	
 	virtual void OnRep_PlayerState() override;
+	
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_HitReact(int32 MontageIndex);
 	
 private:
 	void FABRIK_CalculateSocketTransform();
