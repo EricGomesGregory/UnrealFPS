@@ -7,6 +7,7 @@
 #include "HealthComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FFPSHealthChanged, UHealthComponent*, HealthComponent, float, OldValue, float, NewValue, AActor*, Instigator);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FFPSDeathStarted, UHealthComponent*, HealthComponent);
 
 /**
  * EDeathState
@@ -49,9 +50,14 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FFPSHealthChanged OnMaxHealthChanged;
 	
+	UPROPERTY(BlueprintAssignable)
+	FFPSDeathStarted OnDeathStarted;
+	
 protected:
 	virtual void BeginPlay() override;
 
+	void StartDeath();
+	
 	UFUNCTION()
 	void OnRep_DeathState(EDeathState OldDeathState);
 

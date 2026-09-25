@@ -29,7 +29,11 @@ bool UHealthComponent::ChangeHealthByAmount(const float Amount, AActor* Instigat
 	const float OldHealth = Health;
 	Health = FMath::Clamp(Health + Amount, 0.0f, MaxHealth);
 	OnHealthChanged.Broadcast(this, OldHealth, Health, Instigator);
-	return Health > 0.0f;
+	if (Health <= 0.0f && OldHealth > 0.0f)
+	{
+		StartDeath();
+	}
+	return false;
 }
 
 void UHealthComponent::ChangeMaxHealthByAmount(const float Amount, AActor* Instigator)
@@ -56,8 +60,21 @@ void UHealthComponent::BeginPlay()
 	Super::BeginPlay();
 }
 
+void UHealthComponent::StartDeath()
+{
+	if (DeathState != EDeathState::NotDead) return;
+	
+	DeathState = EDeathState::DeathStarted;
+	OnDeathStarted.Broadcast(this);
+	GetOwner()->ForceNetUpdate();
+}
+
 void UHealthComponent::OnRep_DeathState(EDeathState OldDeathState)
 {
+	if (DeathState == EDeathState::DeathStarted)
+	{
+		OnDeathStarted.Broadcast(this);
+	}
 }
 
 void UHealthComponent::OnRep_Health(float OldHealth)

@@ -4,9 +4,12 @@
 #include "FPSCharacter.h"
 
 #include "Camera/CameraComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "FPS/FPS.h"
 #include "FPS/Combat/CombatComponent.h"
 #include "FPS/Health/HealthComponent.h"
+#include "FPS/Player/FPSPlayerController.h"
 #include "FPS/Weapon/Weapon.h"
 #include "FPS/Weapon/WeaponData.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -134,6 +137,17 @@ void AFPSCharacter::BeginPlay()
 	
 	check(CombatComponent);
 	CombatComponent->OnAimWeapon.AddDynamic(this, &AFPSCharacter::OnAiming);
+	
+	check(HealthComponent)
+	HealthComponent->OnDeathStarted.AddDynamic(this, &AFPSCharacter::OnDeathStarted);
+	
+	if (auto* ShooterPC = Cast<AFPSPlayerController>(GetController()))
+	{
+		if (IsLocallyControlled())
+		{
+			ShooterPC->bPawnAlive = true;
+		}
+	}
 }
 
 void AFPSCharacter::BeginDestroy()
@@ -224,6 +238,42 @@ FRotator AFPSCharacter::GetFixedAimedRotation() const
 		AimRotation.Pitch = FMath::GetMappedRangeValueClamped(InRange, OutRange, AimRotation.Pitch);
 	}
 	return AimRotation;
+}
+
+void AFPSCharacter::OnDeathStarted(UHealthComponent* InHealthComponent)
+{
+	check(InHealthComponent);
+	
+	if (InHealthComponent != HealthComponent)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("OnDeathStarted: Provided HealthComponent [%s] does not match character's HealthComponent [%s]"), *InHealthComponent->GetName(), *HealthComponent->GetName());
+		return;
+	}
+	
+	if (HasAuthority())
+	{
+		CombatComponent->DestroyInventoryWeapons();
+	}
+	
+	if (GetNetMode() != NM_DedicatedServer)
+	{
+		if (auto* ShooterPC = Cast<AFPSPlayerController>(GetController()))
+		{
+			DisableInput(ShooterPC);
+			
+			if (IsLocallyControlled())
+			{
+				ShooterPC->bPawnAlive = false;
+			}
+		}
+		
+		K2_OnDeathStarted();	
+	}
+	
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
+	GetCapsuleComponent()->SetCollisionResponseToChannel(FPSTraceChannels::ECC_Weapon, ECR_Ignore);
+	
+	GetMesh()->SetCollisionResponseToChannel(FPSTraceChannels::ECC_Weapon, ECR_Ignore);
 }
 
 void AFPSCharacter::FABRIK_CalculateSocketTransform()

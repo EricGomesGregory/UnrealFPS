@@ -109,6 +109,12 @@ protected:
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_HitReact(int32 MontageIndex);
 	
+	UFUNCTION()
+	void OnDeathStarted(UHealthComponent* InHealthComponent);
+	
+	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName="OnDeathStarted"))
+	void K2_OnDeathStarted();
+	
 private:
 	void FABRIK_CalculateSocketTransform();
 	

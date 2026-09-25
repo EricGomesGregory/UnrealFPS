@@ -63,6 +63,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category="FPS|Input|Combat")
 	TObjectPtr<UInputAction> ReloadWeaponAction;
 	
+public:
+	bool bPawnAlive;
+	
 protected:
 	virtual void BeginPlay() override;
 

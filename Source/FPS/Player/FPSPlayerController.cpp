@@ -14,6 +14,8 @@
 AFPSPlayerController::AFPSPlayerController()
 {
 	bReplicates = true;
+	
+	bPawnAlive = true;
 }
 
 void AFPSPlayerController::BeginPlay()
@@ -61,6 +63,8 @@ void AFPSPlayerController::SetupInputComponent()
 
 void AFPSPlayerController::Input_Move(const FInputActionValue& InputActionValue)
 {
+	if (!bPawnAlive) return;
+	
 	const FVector2D InputAxisVector = InputActionValue.Get<FVector2D>();
 
 	if (APawn* ControlledPawn = GetPawn())
@@ -83,6 +87,8 @@ void AFPSPlayerController::Input_Move(const FInputActionValue& InputActionValue)
 
 void AFPSPlayerController::Input_Look(const FInputActionValue& InputActionValue)
 {
+	if (!bPawnAlive) return;
+	
 	const FVector2D InputAxisVector = InputActionValue.Get<FVector2D>();
 
 	if (APawn* ControlledPawn = GetPawn())
@@ -94,6 +100,8 @@ void AFPSPlayerController::Input_Look(const FInputActionValue& InputActionValue)
 
 void AFPSPlayerController::Input_Jump(const FInputActionValue& InputActionValue)
 {
+	if (!bPawnAlive) return;
+	
 	if (ACharacter* ControlledCharacter = GetCharacter())
 	{
 		if (ControlledCharacter->IsCrouched())
@@ -107,6 +115,8 @@ void AFPSPlayerController::Input_Jump(const FInputActionValue& InputActionValue)
 
 void AFPSPlayerController::Input_Crouch(const FInputActionValue& InputActionValue)
 {
+	if (!bPawnAlive) return;
+	
 	if (auto* ControlledCharacter = Cast<AFPSCharacter>(GetCharacter()))
 	{
 		ControlledCharacter->ToggleCrouch();
@@ -115,6 +125,8 @@ void AFPSPlayerController::Input_Crouch(const FInputActionValue& InputActionValu
 
 void AFPSPlayerController::Input_AimWeapon_Pressed(const FInputActionValue& InputActionValue)
 {
+	if (!bPawnAlive) return;
+	
 	if (auto* CombatComponent = UCombatComponent::FindCombatComponent(GetCharacter()))
 	{
 		CombatComponent->Initiate_AimWeapon_Pressed();
@@ -123,6 +135,8 @@ void AFPSPlayerController::Input_AimWeapon_Pressed(const FInputActionValue& Inpu
 
 void AFPSPlayerController::Input_AimWeapon_Released(const FInputActionValue& InputActionValue)
 {
+	if (!bPawnAlive) return;
+	
 	if (auto* CombatComponent = UCombatComponent::FindCombatComponent(GetCharacter()))
 	{
 		CombatComponent->Initiate_AimWeapon_Released();
@@ -131,6 +145,8 @@ void AFPSPlayerController::Input_AimWeapon_Released(const FInputActionValue& Inp
 
 void AFPSPlayerController::Input_CycleWeapon(const FInputActionValue& InputActionValue)
 {
+	if (!bPawnAlive) return;
+	
 	if (auto* CombatComponent = UCombatComponent::FindCombatComponent(GetCharacter()))
 	{
 		CombatComponent->Initiate_CycleWeapon();
@@ -139,6 +155,8 @@ void AFPSPlayerController::Input_CycleWeapon(const FInputActionValue& InputActio
 
 void AFPSPlayerController::Input_FireWeapon_Pressed(const FInputActionValue& InputActionValue)
 {
+	if (!bPawnAlive) return;
+	
 	if (auto* CombatComponent = UCombatComponent::FindCombatComponent(GetCharacter()))
 	{
 		CombatComponent->Initiate_FireWeapon_Pressed();
@@ -147,6 +165,8 @@ void AFPSPlayerController::Input_FireWeapon_Pressed(const FInputActionValue& Inp
 
 void AFPSPlayerController::Input_FireWeapon_Released(const FInputActionValue& InputActionValue)
 {
+	if (!bPawnAlive) return;
+	
 	if (auto* CombatComponent = UCombatComponent::FindCombatComponent(GetCharacter()))
 	{
 		CombatComponent->Initiate_FireWeapon_Released();
@@ -155,6 +175,8 @@ void AFPSPlayerController::Input_FireWeapon_Released(const FInputActionValue& In
 
 void AFPSPlayerController::Input_ReloadWeapon(const FInputActionValue& InputActionValue)
 {
+	if (!bPawnAlive) return;
+	
 	if (auto* CombatComponent = UCombatComponent::FindCombatComponent(GetCharacter()))
 	{
 		CombatComponent->Initiate_ReloadWeapon();
