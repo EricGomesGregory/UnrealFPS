@@ -122,7 +122,8 @@ bool AFPSCharacter::DoDamage_Implementation(float DamageAmount, AActor* DamageIn
 	const int32 HitMontageIndex = FMath::RandRange(0, HitReactMontages.Num() - 1);
 	Multicast_HitReact(HitMontageIndex);
 	
-	return false; //@Eric TODO: Return if damage was lethal 
+	HealthComponent->ChangeHealthByAmount(-DamageAmount, DamageInstigator);
+	return false; 
 }
 
 void AFPSCharacter::BeginPlay()

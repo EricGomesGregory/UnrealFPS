@@ -504,7 +504,7 @@ void UCombatComponent::Server_FireWeapon_Implementation(const FHitResult& HitRes
 	{
 		if (HitResult.GetActor()->Implements<UPlayerInterface>())
 		{
-			const float Damage = 0.f; //@Eric TODO: Implement damage calculation
+			const float Damage = CurrentWeapon->GetBaseDamage();
 			IPlayerInterface::Execute_DoDamage(HitResult.GetActor(), Damage, GetOwningPawn());
 		}
 	}

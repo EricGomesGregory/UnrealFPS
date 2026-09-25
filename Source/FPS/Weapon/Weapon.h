@@ -57,6 +57,9 @@ public:
 	void SetWeaponStatus(const EFPSWeaponStatus NewStatus);
 	
 	UFUNCTION(BlueprintPure, Category="FPS|Weapon")
+	float GetBaseDamage() const { return BaseDamage; }
+	
+	UFUNCTION(BlueprintPure, Category="FPS|Weapon")
 	EFPSFireType GetFireMode() const { return FireMode; }
 	
 	UFUNCTION(BlueprintPure, Category="FPS|Weapon")
@@ -127,6 +130,9 @@ public:
 	bool bDebugWeapon;
 	
 protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPS|Weapon")
+	float BaseDamage;
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPS|Weapon")
 	TEnumAsByte<EFPSFireType> FireMode;
 	

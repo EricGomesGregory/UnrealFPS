@@ -15,6 +15,7 @@
 
 
 AWeapon::AWeapon()
+: BaseDamage(10.0f)
 {
 	PrimaryActorTick.bCanEverTick = false;
 	bReplicates = true;
