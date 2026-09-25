@@ -6,6 +6,7 @@
 #include "Camera/CameraComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "FPS/Combat/CombatComponent.h"
+#include "FPS/Health/HealthComponent.h"
 #include "FPS/Weapon/Weapon.h"
 #include "FPS/Weapon/WeaponData.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -46,6 +47,9 @@ AFPSCharacter::AFPSCharacter()
 	
 	CombatComponent = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComponent"));
 	CombatComponent->SetIsReplicated(true);
+	
+	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
+	HealthComponent->SetIsReplicated(true);
 	
 	TurningStatus = EFPSTurningInPlace::NotTurning;
 	TurnInPlaceInterpolationSpeed = 4.0f;

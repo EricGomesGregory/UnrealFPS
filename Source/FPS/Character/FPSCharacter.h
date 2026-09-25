@@ -9,9 +9,10 @@
 #include "GameFramework/Character.h"
 #include "FPSCharacter.generated.h"
 
+class USpringArmComponent;
+class UHealthComponent;
 class UCombatComponent;
 class UCameraComponent;
-class USpringArmComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FFPSWeaponFirstReplicated, AWeapon*, Weapon);
 
@@ -76,6 +77,9 @@ public:
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="FPS|Character")
 	TObjectPtr<UCombatComponent> CombatComponent;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="FPS|Character")
+	TObjectPtr<UHealthComponent> HealthComponent;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<USkeletalMeshComponent> FirstPersonMesh;
