@@ -81,6 +81,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="FPS|Character")
 	TObjectPtr<UHealthComponent> HealthComponent;
 	
+	UPROPERTY(EditDefaultsOnly, Category="FPS|Character")
+	float RespawnTime;
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<USkeletalMeshComponent> FirstPersonMesh;
 	
@@ -122,10 +125,14 @@ private:
 	
 	void TurnInPlace(float DeltaTime);
 	
+	void DeathTimerFinished();
+	
 private:
 	FRotator StartingRotation;
 	
 	float InterpAO_Yaw;
 	
 	bool bWeaponFirstReplicated;
+	
+	FTimerHandle DeathTimer;
 };

@@ -8,16 +8,19 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "FPS/FPS.h"
 #include "FPS/Combat/CombatComponent.h"
+#include "FPS/Game/FPSGameMode.h"
 #include "FPS/Health/HealthComponent.h"
 #include "FPS/Player/FPSPlayerController.h"
 #include "FPS/Weapon/Weapon.h"
 #include "FPS/Weapon/WeaponData.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 
 
 AFPSCharacter::AFPSCharacter()
+: RespawnTime(3.0f)
 {
 	PrimaryActorTick.bCanEverTick = true;
 	
@@ -253,6 +256,8 @@ void AFPSCharacter::OnDeathStarted(UHealthComponent* InHealthComponent)
 	if (HasAuthority())
 	{
 		CombatComponent->DestroyInventoryWeapons();
+		
+		GetWorld()->GetTimerManager().SetTimer(DeathTimer,this, &ThisClass::DeathTimerFinished, RespawnTime);
 	}
 	
 	if (GetNetMode() != NM_DedicatedServer)
@@ -359,5 +364,11 @@ void AFPSCharacter::TurnInPlace(const float DeltaTime)
 			StartingRotation = FRotator(0.0f, GetBaseAimRotation().Yaw, 0.0f);
 		}
 	}
+}
+
+void AFPSCharacter::DeathTimerFinished()
+{
+	auto* GM = CastChecked<AFPSGameMode>(UGameplayStatics::GetGameMode(this));
+	GM->RequestRespawn(this, GetController());
 }
 
