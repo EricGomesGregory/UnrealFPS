@@ -39,6 +39,14 @@ public:
 	
 	void SetWinner();
 	
+	bool IsOnEliminationStreak() const { return bOnEliminationStreak; }
+	
+	void SetOnEliminationStreak(bool bActive);
+	
+	void SetLastAttacker(APlayerState* Attacker);
+	
+	APlayerState* GetLastAttacker() const { return LastAttacker.IsValid() ? LastAttacker.Get() : nullptr; }
+	
 private:
 	int32 Eliminations;
 	
@@ -65,4 +73,6 @@ private:
 	bool bFirstBlood;
 	
 	bool bWinner;
+	
+	TWeakObjectPtr<APlayerState> LastAttacker;
 };

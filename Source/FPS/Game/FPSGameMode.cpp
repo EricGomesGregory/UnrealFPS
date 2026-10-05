@@ -3,10 +3,16 @@
 
 #include "FPSGameMode.h"
 
+#include "FPS/Player/FPSPlayerState.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/PlayerStart.h"
 #include "Kismet/GameplayStatics.h"
 
+
+AFPSGameMode::AFPSGameMode()
+{
+	PlayerStateClass = AFPSPlayerState::StaticClass();
+}
 
 void AFPSGameMode::RequestRespawn(ACharacter* Character, AController* Controller)
 {

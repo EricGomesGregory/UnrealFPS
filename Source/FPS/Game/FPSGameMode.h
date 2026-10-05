@@ -15,5 +15,7 @@ class FPS_API AFPSGameMode : public AGameModeBase
 	GENERATED_BODY()
 	
 public:
+	AFPSGameMode();
+	
 	void RequestRespawn(ACharacter* Character, AController* Controller);
 };

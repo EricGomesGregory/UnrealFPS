@@ -100,3 +100,13 @@ void AFPSPlayerState::SetWinner()
 {
 	bWinner = true;
 }
+
+void AFPSPlayerState::SetOnEliminationStreak(bool bActive)
+{
+	bOnEliminationStreak = bActive;
+}
+
+void AFPSPlayerState::SetLastAttacker(APlayerState* Attacker)
+{
+	LastAttacker = Attacker;
+}

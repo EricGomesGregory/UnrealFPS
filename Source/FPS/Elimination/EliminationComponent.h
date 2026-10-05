@@ -6,6 +6,9 @@
 #include "Components/ActorComponent.h"
 #include "EliminationComponent.generated.h"
 
+enum class ESpecialEliminationType : uint16;
+class AFPSPlayerState;
+
 
 UCLASS(ClassGroup=(FPS), meta=(BlueprintSpawnableComponent))
 class FPS_API UEliminationComponent : public UActorComponent
@@ -17,4 +20,31 @@ public:
 	
 	UFUNCTION()
 	void OnRoundReported(AActor* Attacker, AActor* Victim, bool bHit, bool bHeadShot, bool bLethal);
+	
+protected:
+	AFPSPlayerState* GetPlayerStateFromActor(AActor* Actor) const;
+	
+	void ProcessHitOrMiss(AFPSPlayerState* AttackerPS, bool bHit, bool bHeadShot);
+	
+	void ProcessElimination(AFPSPlayerState* AttackerPS, AFPSPlayerState* VictimPS, bool bHeadShot);
+	
+	void ProcessHeadShot(bool bHeadShot, ESpecialEliminationType& OutEliminationType);
+	
+	void ProcessSequentialElimination(AFPSPlayerState* AttackerPS, ESpecialEliminationType& OutEliminationType);
+	
+	void ProcessStreakRevengeShowStopper(AFPSPlayerState* AttackerPS, AFPSPlayerState* VictimPS, ESpecialEliminationType& OutEliminationType);
+	
+protected:
+	UPROPERTY(EditDefaultsOnly, Category="FPS|Elimination")
+	float SequentialEliminationInterval;
+	
+	UPROPERTY(EditDefaultsOnly, Category="FPS|Elimination")
+	int32 StreakEliminationCount;
+	
+private:
+	float LastEliminationTime;
+	
+	int32 SequentialEliminationCount;
+	
+	int32 StreakCount;
 };
