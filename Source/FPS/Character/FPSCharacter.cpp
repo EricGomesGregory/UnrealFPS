@@ -8,6 +8,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "FPS/FPS.h"
 #include "FPS/Combat/CombatComponent.h"
+#include "FPS/Elimination/EliminationComponent.h"
 #include "FPS/Game/FPSGameMode.h"
 #include "FPS/Health/HealthComponent.h"
 #include "FPS/Player/FPSPlayerController.h"
@@ -56,6 +57,9 @@ AFPSCharacter::AFPSCharacter()
 	
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 	HealthComponent->SetIsReplicated(true);
+	
+	EliminationComponent = CreateDefaultSubobject<UEliminationComponent>(TEXT("EliminationComponent"));
+	EliminationComponent->SetIsReplicated(false);
 	
 	TurningStatus = EFPSTurningInPlace::NotTurning;
 	TurnInPlaceInterpolationSpeed = 4.0f;
@@ -128,8 +132,8 @@ bool AFPSCharacter::DoDamage_Implementation(float DamageAmount, AActor* DamageIn
 	const int32 HitMontageIndex = FMath::RandRange(0, HitReactMontages.Num() - 1);
 	Multicast_HitReact(HitMontageIndex);
 	
-	HealthComponent->ChangeHealthByAmount(-DamageAmount, DamageInstigator);
-	return false; 
+	const bool bLethal = HealthComponent->ChangeHealthByAmount(-DamageAmount, DamageInstigator);
+	return bLethal; 
 }
 
 void AFPSCharacter::BeginPlay()
@@ -150,6 +154,11 @@ void AFPSCharacter::BeginPlay()
 		{
 			ShooterPC->bPawnAlive = true;
 		}
+	}
+	
+	if (HasAuthority())
+	{
+		CombatComponent->OnRoundReported.AddDynamic(EliminationComponent, &UEliminationComponent::OnRoundReported);
 	}
 }
 

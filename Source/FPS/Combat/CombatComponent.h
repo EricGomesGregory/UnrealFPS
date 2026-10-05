@@ -19,6 +19,8 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FCombatCrosshairChanged, UMateria
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FCombatMagazineChanged, UMaterialInstanceDynamic*, CrosshairDynMatInst, int32, Current, int32, Size);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FCombatMagazineDelegate, int32, Current, int32, Size, int32, Reserve);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FCombatCurrenReserveChanged, int32, InReserves, int32, InWeapon, UMaterialInterface*, WeaponIconMaterial);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_FiveParams(FCombatRoundReportedDelegate, AActor*, Attacker, AActor*, Victim, bool, bHit, bool, bHeadShot, bool, bLethal);
+
 
 UCLASS()
 class FPS_API UCombatComponent : public UActorComponent
@@ -100,6 +102,9 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FCombatCurrenReserveChanged OnCurrentReserveChanged;
 	
+	UPROPERTY(BlueprintAssignable)
+	FCombatRoundReportedDelegate OnRoundReported;
+	
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPS|Weapon")
 	TObjectPtr<UWeaponData> WeaponsData;
@@ -111,6 +116,8 @@ protected:
 	float TraceLength;
 	
 	AWeapon* SpawnWeapon(TSubclassOf<AWeapon> WeaponClass) const;
+	
+	void BroadcastRoundFired(AActor* Attacker, AActor* Victim, bool bHit, bool bHeadShot, bool bLethal) const;
 	
 protected:
 	UFUNCTION()

@@ -328,6 +328,11 @@ AWeapon* UCombatComponent::SpawnWeapon(const TSubclassOf<AWeapon> WeaponClass) c
 	return GetWorld()->SpawnActor<AWeapon>(WeaponClass, SpawnParams);
 }
 
+void UCombatComponent::BroadcastRoundFired(AActor* Attacker, AActor* Victim, const bool bHit, const bool bHeadShot, const bool bLethal) const
+{
+	OnRoundReported.Broadcast(Attacker, Victim, bHit, bHeadShot, bLethal);
+}
+
 void UCombatComponent::OnRep_CurrentWeapon(AWeapon* LastWeapon)
 {
 	APawn* OwningPawn = CastChecked<APawn>(GetOwner());
@@ -500,12 +505,22 @@ void UCombatComponent::Server_FireWeapon_Implementation(const FHitResult& HitRes
 	if (!IsValid(CurrentWeapon)) return;
 	if (CurrentWeapon->GetMagazine() <= 0) return;
 	
+	bool bHit = false;
+	bool bHeadshot = false;
+	bool bLethal = false;
+	AActor* Attacker = GetOwner();
+	AActor* Victim = nullptr;
+	
 	if (IsValid(HitResult.GetActor()))
 	{
 		if (HitResult.GetActor()->Implements<UPlayerInterface>())
 		{
+			bHit = true;
+			bHeadshot = HitResult.BoneName == FName("head");
+			Victim = HitResult.GetActor();
+			
 			const float Damage = CurrentWeapon->GetBaseDamage();
-			IPlayerInterface::Execute_DoDamage(HitResult.GetActor(), Damage, GetOwningPawn());
+			bLethal = IPlayerInterface::Execute_DoDamage(HitResult.GetActor(), Damage, GetOwningPawn());
 		}
 	}
 	
@@ -514,6 +529,7 @@ void UCombatComponent::Server_FireWeapon_Implementation(const FHitResult& HitRes
 	{
 		CurrentWeapon->Auth_Fire();
 	}
+	BroadcastRoundFired(Attacker, Victim, bHit, bHeadshot, bLethal);
 	Multicast_FireWeapon(HitResult, CurrentWeapon->GetMagazine());
 }
 

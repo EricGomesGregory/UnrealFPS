@@ -9,6 +9,7 @@
 #include "GameFramework/Character.h"
 #include "FPSCharacter.generated.h"
 
+class UEliminationComponent;
 class USpringArmComponent;
 class UHealthComponent;
 class UCombatComponent;
@@ -80,6 +81,9 @@ protected:
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="FPS|Character")
 	TObjectPtr<UHealthComponent> HealthComponent;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="FPS|Character")
+	TObjectPtr<UEliminationComponent> EliminationComponent;
 	
 	UPROPERTY(EditDefaultsOnly, Category="FPS|Character")
 	float RespawnTime;
