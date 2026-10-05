@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "FPS/FPSTypes.h"
 #include "GameFramework/PlayerState.h"
 #include "FPSPlayerState.generated.h"
 
@@ -19,11 +20,19 @@ public:
 	
 	void AddElimination(bool bFromHeadShot = false);
 	
+	int32 GetEliminations() const { return Eliminations; }
+	
 	void AddDefeat();
+	
+	int32 GetDefeats() const { return Defeats; }
 	
 	void AddHit();
 	
+	int32 GetHits() const { return RoundsHit; }
+	
 	void AddMiss();
+	
+	int32 GetMiss() const { return RoundsMissed; }
 	
 	void AddSequentialElimination(int32 Count);
 	
@@ -31,9 +40,15 @@ public:
 	
 	void AddRevengeElimination();
 	
+	int32 GetRevengeEliminations() const { return RevengeEliminations; }
+	
 	void AddDethroneElimination();
 	
+	int32 GetDethroneEliminations() const { return DethroneEliminations; }
+	
 	void AddShowStopper();
+	
+	int32 GetShowStopper() const { return ShowStopperEliminations; }
 	
 	void FirstBlood();
 	
@@ -46,6 +61,15 @@ public:
 	void SetLastAttacker(APlayerState* Attacker);
 	
 	APlayerState* GetLastAttacker() const { return LastAttacker.IsValid() ? LastAttacker.Get() : nullptr; }
+	
+	UFUNCTION(Client, Reliable)
+	void Client_LostTheLead();
+	
+	UFUNCTION(Client, Reliable)
+	void Client_ScoredElimination(int32 EliminationCount);
+	
+	UFUNCTION(Client, Reliable)
+	void Client_ScoredSpecialElimination(const ESpecialEliminationType& SpecialEliminationType, int32 SequentialEliminationCount, int32 StreakCount, int32 EliminationCount);
 	
 private:
 	int32 Eliminations;

@@ -110,3 +110,18 @@ void AFPSPlayerState::SetLastAttacker(APlayerState* Attacker)
 {
 	LastAttacker = Attacker;
 }
+
+void AFPSPlayerState::Client_ScoredSpecialElimination_Implementation(const ESpecialEliminationType& SpecialEliminationType, int32 SequentialEliminationCount, int32 StreakCount, int32 EliminationCount)
+{
+	//@Eric TODO: Implement delegate dispatching 
+}
+
+void AFPSPlayerState::Client_ScoredElimination_Implementation(int32 EliminationCount)
+{
+	//@Eric TODO: Implement delegate dispatching 
+}
+
+void AFPSPlayerState::Client_LostTheLead_Implementation()
+{
+	//@Eric TODO: Implement delegate dispatching 
+}

@@ -4,7 +4,9 @@
 #include "EliminationComponent.h"
 
 #include "FPS/FPSTypes.h"
+#include "FPS/Game/FPSGameState.h"
 #include "FPS/Player/FPSPlayerState.h"
+#include "Kismet/GameplayStatics.h"
 
 
 UEliminationComponent::UEliminationComponent()
@@ -64,6 +66,19 @@ void UEliminationComponent::ProcessElimination(AFPSPlayerState* AttackerPS, AFPS
 	ProcessHeadShot(bHeadShot, EliminationType);
 	ProcessSequentialElimination(AttackerPS, EliminationType);
 	ProcessStreakRevengeShowStopper(AttackerPS, VictimPS, EliminationType);
+	
+	auto* FPSGameState = CastChecked<AFPSGameState>(UGameplayStatics::GetGameState(GetWorld()));
+	HandleFirstBlood(FPSGameState, AttackerPS, EliminationType);
+	UpdateLeaderStatus(FPSGameState, AttackerPS, VictimPS, EliminationType);
+	
+	if (HasSpecialEliminationTypes(EliminationType))
+	{
+		AttackerPS->Client_ScoredSpecialElimination(EliminationType, SequentialEliminationCount, StreakCount, AttackerPS->GetEliminations());
+	}
+	else
+	{
+		AttackerPS->Client_ScoredElimination(AttackerPS->GetEliminations());
+	}
 }
 
 void UEliminationComponent::ProcessHeadShot(bool bHeadShot, ESpecialEliminationType& OutEliminationType)
@@ -122,6 +137,49 @@ void UEliminationComponent::ProcessStreakRevengeShowStopper(AFPSPlayerState* Att
 	}
 	
 	VictimPS->SetLastAttacker(AttackerPS);
+}
+
+void UEliminationComponent::HandleFirstBlood(AFPSGameState* GameState, AFPSPlayerState* AttackerPS, ESpecialEliminationType& OutEliminationType)
+{
+	if (!GameState->HasFirstBloodTriggered())
+	{
+		OutEliminationType |= ESpecialEliminationType::FirstBlood;
+		AttackerPS->FirstBlood();
+		GameState->UpdateLeader();
+	}
+}
+
+void UEliminationComponent::UpdateLeaderStatus(AFPSGameState* GameState, AFPSPlayerState* AttackerPS, AFPSPlayerState* VictimPS, ESpecialEliminationType& OutEliminationType)
+{
+	auto* LastLeader = GameState->GetSoleLeader();
+	const bool bAttackerWasTiedForTheLead = GameState->IsTiedForTheLead(AttackerPS);
+	
+	GameState->UpdateLeader();
+	if (!bAttackerWasTiedForTheLead && GameState->IsTiedForTheLead(AttackerPS))
+	{
+		OutEliminationType |= ESpecialEliminationType::TiedTheLeader;
+	}
+	
+	if (IsValid(LastLeader) && LastLeader != GameState->GetSoleLeader())
+	{
+		LastLeader->Client_LostTheLead();
+		
+		if (VictimPS == LastLeader)
+		{
+			OutEliminationType |= ESpecialEliminationType::Dethrone;
+			AttackerPS->AddDethroneElimination();
+		}
+	}
+	
+	if (AttackerPS != LastLeader && AttackerPS ==GameState->GetSoleLeader())
+	{
+		OutEliminationType |= ESpecialEliminationType::GainedTheLead;
+	}
+}
+
+bool UEliminationComponent::HasSpecialEliminationTypes(const ESpecialEliminationType& SpecialEliminationType) const
+{
+	return static_cast<uint16>(SpecialEliminationType) != 0;
 }
 
 
