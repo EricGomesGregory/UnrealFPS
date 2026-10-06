@@ -18,6 +18,15 @@ AFPSPlayerController::AFPSPlayerController()
 	bPawnAlive = true;
 }
 
+void AFPSPlayerController::OnRep_PlayerState()
+{
+	Super::OnRep_PlayerState();
+	
+	check(PlayerState);
+	
+	OnPlayerStateReplicated.Broadcast();
+}
+
 void AFPSPlayerController::BeginPlay()
 {
 	Super::BeginPlay();

@@ -10,6 +10,8 @@ class UInputAction;
 struct FInputActionValue;
 class UInputMappingContext;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FPlayerStateReplicatedDelegate);
+
 
 USTRUCT(BlueprintType)
 struct FFPSInputMappingContext
@@ -35,6 +37,12 @@ class FPS_API AFPSPlayerController : public APlayerController
 public:
 	AFPSPlayerController();
 
+public:
+	UPROPERTY(BlueprintAssignable)
+	mutable FPlayerStateReplicatedDelegate OnPlayerStateReplicated;
+	
+	virtual void OnRep_PlayerState() override;
+	
 protected:
 	UPROPERTY(EditDefaultsOnly, Category="FPS|Input")
 	TArray<FFPSInputMappingContext> MappingContexts;

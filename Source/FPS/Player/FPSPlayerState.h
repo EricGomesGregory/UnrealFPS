@@ -11,6 +11,8 @@
 class UFPSSpecialEliminationWidget;
 class USpecialEliminationsData;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FScoreEliminationDelegate, int32, Eliminations);
+
 
 /**
  * 
@@ -78,6 +80,10 @@ public:
 	
 	UFUNCTION(BlueprintPure, Category="FPS|Eliminations")
 	USpecialEliminationsData* GetSpecialEliminationsData() const { return SpecialEliminationsData; }
+	
+public:
+	UPROPERTY(BlueprintAssignable)
+	FScoreEliminationDelegate OnScoreEliminationChanged;
 	
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPS|Eliminations")

@@ -147,9 +147,7 @@ void AFPSPlayerState::Client_ScoredSpecialElimination_Implementation(const ESpec
 
 void AFPSPlayerState::Client_ScoredElimination_Implementation(int32 EliminationCount)
 {
-	ensure(SpecialEliminationsData);
-	
-	//@Eric TODO: Implement delegate dispatching 
+	OnScoreEliminationChanged.Broadcast(EliminationCount);
 }
 
 void AFPSPlayerState::Client_LostTheLead_Implementation()
