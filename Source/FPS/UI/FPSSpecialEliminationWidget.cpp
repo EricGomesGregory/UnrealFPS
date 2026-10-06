@@ -19,10 +19,10 @@ void UFPSSpecialEliminationWidget::InitializeWidget(const FString& EliminationMe
 void UFPSSpecialEliminationWidget::CenterWidget(UUserWidget* Widget, float VerticalOffset)
 {
 	check(Widget);
-	
-	FVector2D ViewportSize = UWidgetLayoutLibrary::GetViewportSize(Widget);
+
+	const FVector2D ViewportSize = UWidgetLayoutLibrary::GetViewportSize(Widget);
 	const float VerticalFraction = ((VerticalOffset == 0.0f) ? 1.0f : VerticalOffset * 2.0f);
-	FVector2D CenterPosition = FVector2D(ViewportSize.X / 2.0f, VerticalFraction * (ViewportSize.Y / 2.0f));
+	const FVector2D CenterPosition = FVector2D(ViewportSize.X / 2.0f, VerticalFraction * (ViewportSize.Y / 2.0f));
 	Widget->SetAlignmentInViewport(FVector2D(0.5f, 0.5f));
 	Widget->SetPositionInViewport(CenterPosition, true);
 }

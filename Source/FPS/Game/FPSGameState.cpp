@@ -62,5 +62,5 @@ AFPSPlayerState* AFPSGameState::GetSoleLeader() const
 
 bool AFPSGameState::IsTiedForTheLead(AFPSPlayerState* PlayerState) const
 {
-	return Leaders.Contains(PlayerState);
+	return Leaders.Contains(PlayerState) && Leaders.Num() > 1;
 }

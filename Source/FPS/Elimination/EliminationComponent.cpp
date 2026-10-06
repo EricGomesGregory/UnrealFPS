@@ -73,12 +73,9 @@ void UEliminationComponent::ProcessElimination(AFPSPlayerState* AttackerPS, AFPS
 	
 	if (HasSpecialEliminationTypes(EliminationType))
 	{
-		AttackerPS->Client_ScoredSpecialElimination(EliminationType, SequentialEliminationCount, StreakCount, AttackerPS->GetEliminations());
+		AttackerPS->Client_ScoredSpecialElimination(EliminationType, SequentialEliminationCount, StreakCount);
 	}
-	else
-	{
-		AttackerPS->Client_ScoredElimination(AttackerPS->GetEliminations());
-	}
+	AttackerPS->Client_ScoredElimination(AttackerPS->GetEliminations());
 }
 
 void UEliminationComponent::ProcessHeadShot(bool bHeadShot, ESpecialEliminationType& OutEliminationType)

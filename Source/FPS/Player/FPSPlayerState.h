@@ -4,8 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "FPS/FPSTypes.h"
+#include "FPS/Elimination/SpecialEliminationsData.h"
 #include "GameFramework/PlayerState.h"
 #include "FPSPlayerState.generated.h"
+
+class UFPSSpecialEliminationWidget;
+class USpecialEliminationsData;
+
 
 /**
  * 
@@ -69,7 +74,27 @@ public:
 	void Client_ScoredElimination(int32 EliminationCount);
 	
 	UFUNCTION(Client, Reliable)
-	void Client_ScoredSpecialElimination(const ESpecialEliminationType& SpecialEliminationType, int32 SequentialEliminationCount, int32 StreakCount, int32 EliminationCount);
+	void Client_ScoredSpecialElimination(const ESpecialEliminationType& SpecialEliminationType, int32 SequentialEliminationCount, int32 StreakCount);
+	
+	UFUNCTION(BlueprintPure, Category="FPS|Eliminations")
+	USpecialEliminationsData* GetSpecialEliminationsData() const { return SpecialEliminationsData; }
+	
+protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPS|Eliminations")
+	TObjectPtr<USpecialEliminationsData> SpecialEliminationsData;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPS|UI")
+	TSubclassOf<UFPSSpecialEliminationWidget> SpecialEliminationsWidgetClass;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPS|UI")
+	float SpecialEliminationDisplayDelay;
+	
+private:
+	static TArray<ESpecialEliminationType> DecodeSpecialEliminationBitMask(const ESpecialEliminationType BitMask);
+	
+	void ProcessSpecialElimination();
+	
+	void DisplaySpecialElimination(const FSpecialEliminationInfo& EliminationInfo) const;
 	
 private:
 	int32 Eliminations;
@@ -99,4 +124,8 @@ private:
 	bool bWinner;
 	
 	TWeakObjectPtr<APlayerState> LastAttacker;
+	
+	TQueue<FSpecialEliminationInfo> SpecialEliminationQueue;
+	
+	bool bIsProcessingEliminationQueue;
 };

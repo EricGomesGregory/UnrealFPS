@@ -3,6 +3,9 @@
 
 #include "FPSPlayerState.h"
 
+#include "FPS/Elimination/SpecialEliminationsData.h"
+#include "FPS/UI/FPSSpecialEliminationWidget.h"
+
 AFPSPlayerState::AFPSPlayerState()
 {
 	SetNetUpdateFrequency(100.0f);
@@ -20,6 +23,9 @@ AFPSPlayerState::AFPSPlayerState()
 	bOnEliminationStreak = false;
 	bFirstBlood = false;
 	bWinner = false;
+	
+	bIsProcessingEliminationQueue = false;
+	SpecialEliminationDisplayDelay = 0.5f;
 }
 
 void AFPSPlayerState::AddElimination(bool bFromHeadShot)
@@ -111,17 +117,128 @@ void AFPSPlayerState::SetLastAttacker(APlayerState* Attacker)
 	LastAttacker = Attacker;
 }
 
-void AFPSPlayerState::Client_ScoredSpecialElimination_Implementation(const ESpecialEliminationType& SpecialEliminationType, int32 SequentialEliminationCount, int32 StreakCount, int32 EliminationCount)
+void AFPSPlayerState::Client_ScoredSpecialElimination_Implementation(const ESpecialEliminationType& SpecialEliminationType, int32 SequentialEliminationCount, int32 StreakCount)
 {
-	//@Eric TODO: Implement delegate dispatching 
+	ensure(SpecialEliminationsData);
+	
+	auto EliminationTypes = DecodeSpecialEliminationBitMask(SpecialEliminationType);
+	for (const ESpecialEliminationType EliminationType : EliminationTypes)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("EliminationType=%d"), static_cast<uint16>(EliminationType));
+		auto& EliminationInfo = SpecialEliminationsData->SpecialEliminations.FindChecked(EliminationType);
+		EliminationInfo.EliminationType = EliminationType;
+		if (EliminationType == ESpecialEliminationType::Sequential)
+		{
+			EliminationInfo.SequentialEliminationCount = SequentialEliminationCount;
+		}
+		else if (EliminationType == ESpecialEliminationType::Streak)
+		{
+			EliminationInfo.StreakCount = StreakCount;
+		}
+		
+		SpecialEliminationQueue.Enqueue(EliminationInfo);
+	}
+	
+	if (!bIsProcessingEliminationQueue)
+	{
+		ProcessSpecialElimination();
+	}
 }
 
 void AFPSPlayerState::Client_ScoredElimination_Implementation(int32 EliminationCount)
 {
+	ensure(SpecialEliminationsData);
+	
 	//@Eric TODO: Implement delegate dispatching 
 }
 
 void AFPSPlayerState::Client_LostTheLead_Implementation()
 {
-	//@Eric TODO: Implement delegate dispatching 
+	ensure(SpecialEliminationsData);
+	
+	auto& EliminationInfo = SpecialEliminationsData->SpecialEliminations.FindChecked(ESpecialEliminationType::LostTheLead);
+	if (IsValid(SpecialEliminationsWidgetClass))
+	{
+		auto* EliminationWidget = CreateWidget<UFPSSpecialEliminationWidget>(GetPlayerController(), SpecialEliminationsWidgetClass);
+		check(EliminationWidget);
+		
+		EliminationWidget->InitializeWidget(EliminationInfo.Message, EliminationInfo.IconTexture);
+		EliminationWidget->AddToViewport();
+	}
+}
+
+
+TArray<ESpecialEliminationType> AFPSPlayerState::DecodeSpecialEliminationBitMask(const ESpecialEliminationType BitMask)
+{
+	TArray<ESpecialEliminationType> Result;
+	const auto BitMaskValue = static_cast<uint16>(BitMask);
+	for (uint16 i = 0; i < 16; i++)
+	{
+		if (BitMaskValue & (1 << i))
+		{
+			ESpecialEliminationType EnumValue = static_cast<ESpecialEliminationType>((1 << i));
+			Result.Add(EnumValue);
+		}
+	}
+	
+	return Result;
+}
+
+void AFPSPlayerState::ProcessSpecialElimination()
+{
+	FSpecialEliminationInfo EliminationInfo;
+	if (SpecialEliminationQueue.Dequeue(EliminationInfo))
+	{
+		bIsProcessingEliminationQueue = true;
+		DisplaySpecialElimination(EliminationInfo);
+		
+		GetWorld()->GetTimerManager().SetTimerForNextTick([this]()
+		{
+			FTimerHandle TimerHandle;
+			const float Delay = SpecialEliminationDisplayDelay;
+			GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &ThisClass::ProcessSpecialElimination, Delay);
+		});
+	}
+	else
+	{
+		bIsProcessingEliminationQueue = false;
+	}
+}
+
+void AFPSPlayerState::DisplaySpecialElimination(const FSpecialEliminationInfo& EliminationInfo) const
+{
+	if (IsValid(SpecialEliminationsWidgetClass))
+	{
+		auto* EliminationWidget = CreateWidget<UFPSSpecialEliminationWidget>(GetPlayerController(), SpecialEliminationsWidgetClass);
+		check(EliminationWidget);
+	
+		FString Message = EliminationInfo.Message;
+		if (EliminationInfo.EliminationType == ESpecialEliminationType::Sequential)
+		{
+			
+			if (EliminationInfo.SequentialEliminationCount > 4)
+			{
+				Message = FString("Rampage");
+			}
+			else if (EliminationInfo.SequentialEliminationCount == 4)
+			{
+				Message = FString("Quadra Kill");
+			}
+			else if (EliminationInfo.SequentialEliminationCount == 3)
+			{
+				Message = FString("Triple Kill");
+			}
+			else if (EliminationInfo.SequentialEliminationCount == 2)
+			{
+				Message = FString("Double Kill");
+			}
+		}
+		else if (EliminationInfo.EliminationType == ESpecialEliminationType::Streak)
+		{
+			Message = FString::Printf(TEXT("%d Streak!"), EliminationInfo.StreakCount);
+		}
+		
+		EliminationWidget->InitializeWidget(Message, EliminationInfo.IconTexture);
+		EliminationWidget->AddToViewport();
+	}
 }
